@@ -14,7 +14,7 @@ import com.googlecode.mockarro.test.SystemUnderTest;
 
 public class AnnotatedInjectionPointTest {
 
-    Class<SystemUnderTest> dummy = SystemUnderTest.class;
+    private final Class<SystemUnderTest> dummy = SystemUnderTest.class;
 
 
     @Test
