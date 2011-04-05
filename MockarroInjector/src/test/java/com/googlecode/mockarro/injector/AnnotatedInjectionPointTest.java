@@ -28,8 +28,8 @@ public class AnnotatedInjectionPointTest {
         assertThat(ip.isInjectable(dummy.getDeclaredConstructor())).isFalse();
         assertThat(ip.isInjectable(dummy.getDeclaredConstructor(Object.class))).isTrue();
 
-        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setPrivatelyFieldInjectionPoint", Object.class))).isTrue();
-        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setFieldInjectionPoint", Object.class))).isTrue();
+        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setUsedByPrivateSetterInjector", Object.class))).isTrue();
+        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setUsedBySetterInjector", Object.class))).isTrue();
         assertThat(ip.isInjectable(dummy.getDeclaredMethod("regularMethod", Object.class))).isFalse();
     }
 
@@ -44,8 +44,8 @@ public class AnnotatedInjectionPointTest {
     @Test
     public void verifyMethodsAreProperlyFiltered() throws SecurityException, NoSuchMethodException {
         final AnnotatedInjectionPoint ip = new AnnotatedInjectionPoint(Inject.class, Method.class);
-        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setPrivatelyFieldInjectionPoint", Object.class))).isFalse();
-        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setFieldInjectionPoint", Object.class))).isFalse();
+        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setUsedByPrivateSetterInjector", Object.class))).isFalse();
+        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setUsedBySetterInjector", Object.class))).isFalse();
     }
 
 
@@ -62,7 +62,7 @@ public class AnnotatedInjectionPointTest {
         final AnnotatedInjectionPoint ip = new AnnotatedInjectionPoint(Inject.class, Field.class, Method.class,
                 Constructor.class);
         assertThat(ip.isInjectable(dummy.getDeclaredField("fieldInjectionPoint"))).isFalse();
-        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setPrivatelyFieldInjectionPoint", Object.class))).isFalse();
+        assertThat(ip.isInjectable(dummy.getDeclaredMethod("setUsedByPrivateSetterInjector", Object.class))).isFalse();
         assertThat(ip.isInjectable(dummy.getDeclaredConstructor(Object.class))).isFalse();
     }
 

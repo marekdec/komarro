@@ -9,20 +9,22 @@ public class SystemUnderTest {
 
     private Object notMeantForInjection;
 
-
+    private Object usedBySetterInjector;
+    
+    private Object usedByPrivateSetterInjector;
 
 
     // this is meant to be used only by an injection engine
     @SuppressWarnings("unused")
     @Inject
-    private void setPrivatelyFieldInjectionPoint(final Object mock) {
-        this.fieldInjectionPoint = mock;
+    private void setUsedByPrivateSetterInjector(final Object mock) {
+        this.usedByPrivateSetterInjector = mock;
     }
 
 
-    @Inject
-    public void setFieldInjectionPoint(final Object mock) {
-        this.fieldInjectionPoint = mock;
+	@Inject
+    public void setUsedBySetterInjector(final Object mock) {
+        this.usedBySetterInjector = mock;
     }
 
 
@@ -51,4 +53,12 @@ public class SystemUnderTest {
         return notMeantForInjection;
     }
 
+    public Object getUsedBySetterInjector() {
+		return usedBySetterInjector;
+	}
+
+
+	public Object getUsedByPrivateSetterInjector() {
+		return usedByPrivateSetterInjector;
+	}
 }

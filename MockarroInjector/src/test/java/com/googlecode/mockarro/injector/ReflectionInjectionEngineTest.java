@@ -29,7 +29,8 @@ public class ReflectionInjectionEngineTest {
     @Test
     public void injectNotAccessibleObjects() {
         // prepare
-        when(mockedMockEngine.createMock(Object.class)).thenReturn(new Object());
+        when(mockedMockEngine.createMock(Object.class)).thenReturn(new Object()).thenReturn(new Object()).thenReturn(
+                new Object());
         engine = new ReflectionInjectionEngine(mockedMockEngine);
 
         final SystemUnderTest sut = new SystemUnderTest();
@@ -40,5 +41,8 @@ public class ReflectionInjectionEngineTest {
         // verify
         assertThat(sut.getFieldInjectionPoint()).isNotNull().isInstanceOf(Object.class);
         assertThat(sut.getNotMeantForInjection()).isNull();
+
+        assertThat(sut.getUsedBySetterInjector()).isNotNull();
+        assertThat(sut.getUsedByPrivateSetterInjector()).isNotNull();
     }
 }
