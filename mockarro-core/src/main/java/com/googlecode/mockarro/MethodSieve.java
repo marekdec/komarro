@@ -16,6 +16,11 @@ public class MethodSieve {
     }
 
 
+    public static MethodSieve methodsOf(final Object objectToSift) {
+        return new MethodSieve(objectToSift.getClass());
+    }
+
+
     public static MethodSieve methodsOf(final Class<?> classToSift) {
         return new MethodSieve(classToSift);
     }

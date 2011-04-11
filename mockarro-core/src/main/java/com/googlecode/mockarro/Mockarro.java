@@ -1,7 +1,9 @@
 package com.googlecode.mockarro;
 
+import static com.googlecode.mockarro.MethodSieve.methodsOf;
 import static com.googlecode.mockarro.injector.Injector.withMockEngine;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -12,6 +14,8 @@ public class Mockarro {
 
     private static Map<Object, Set<Object>> mocksBySut = new WeakHashMap<Object, Set<Object>>();
 
+    private final Set<Object>               mocks;
+
 
     public static void initSut(final Object systemUnderTest) {
         final Set<Object> injectedMocks = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
@@ -20,34 +24,42 @@ public class Mockarro {
     }
 
 
-    public static SutOperation whenever(final Object systemUnderTest) {
-        return new SutOperation(mocksBySut.get(systemUnderTest));
+    private Mockarro(final Set<Object> mocks) {
+        super();
+        this.mocks = mocks;
     }
 
 
-    private Mockarro() {
-        // EMPTY ON PURPOSE
+    public static Mockarro whenever(final Object systemUnderTest) {
+        return new Mockarro(mocksBySut.get(systemUnderTest));
     }
 
-    public static class SutOperation {
 
-        private final Set<Object> mocks;
+    public BehaviorRegistration requests(final Class<?> typeOfRequestedValue) {
+        return new BehaviorRegistration(mocks, typeOfRequestedValue);
+    }
+
+    public static class BehaviorRegistration {
+        private final Set<Object>         mocks;
+
+        private final Class<?>            returnType;
+        private final MockitoMockRecorder recorder = new MockitoMockRecorder();
 
 
-        public SutOperation(final Set<Object> mocks) {
+        private BehaviorRegistration(final Set<Object> mocks, final Class<?> returnType) {
             super();
             this.mocks = mocks;
+            this.returnType = returnType;
         }
 
 
-        public BehaviorDefinition requests(final Class<?> clazz) {
-            return null;
-        }
-    }
+        public void thenReturn(final Object recordedValue) {
+            for (final Object mock : mocks) {
 
-    public static class BehaviorDefinition {
-        public void thenReturn(final Class<?> clazz) {
-
+                for (final Method method : methodsOf(mock).thatReturn(returnType).asSet()) {
+                    recorder.record(mock, method, recordedValue);
+                }
+            }
         }
     }
 
