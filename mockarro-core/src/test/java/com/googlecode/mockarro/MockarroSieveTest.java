@@ -9,28 +9,37 @@ public class MockarroSieveTest {
 
     @Test
     public void siftMethodsUsingReturnTypeCriteria() {
-        assertThat(methodsOf(TestClass.class).thatReturn(Integer.class).asSet()).hasSize(1);
+        assertThat(methodsOf(TestClass.class).thatReturn(int.class).asSet()).hasSize(1);
+        assertThat(methodsOf(TestClass.class).thatReturn(int.class).asSet()).onProperty("name").containsOnly(
+                "returnInt");
+
+        assertThat(methodsOf(TestClass.class).thatReturn(String.class).asSet()).hasSize(2);
+        assertThat(methodsOf(TestClass.class).thatReturn(String.class).asSet()).onProperty("name").containsOnly(
+                "returnAnotherString", "returnString");
+
+        assertThat(methodsOf(TestClass.class).thatReturn(TestClassParent.class).asSet()).onProperty("name")
+                .containsOnly("returnParent");
     }
 
     private static class TestClassParent {
 
-        protected TestClassParent returnParent() {
+        public TestClassParent returnParent() {
             return this;
         }
     }
 
     private static class TestClass extends TestClassParent {
-        private void doesNotReturnAnything() {
+        public void doesNotReturnAnything() {
             // Do nothing
         }
 
 
-        private int returnInt() {
+        public int returnInt() {
             return 1;
         }
 
 
-        protected String returnString() {
+        public String returnString() {
             return "A string";
         }
 

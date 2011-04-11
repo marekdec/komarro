@@ -34,10 +34,11 @@ public class MethodSieve {
 
     public Set<Method> asSet() {
         final Set<Method> methods = new HashSet<Method>();
-        for (final Method method : classToSift.getDeclaredMethods()) {
-            System.out.println(method.getName() + " \tisBridge: " + method.isBridge() + " \tidSynthetic: "
-                    + method.isSynthetic() + " \tisAccessible: " + method.isAccessible());
-            if (returnTypes.contains(method.getReturnType())) {
+
+
+        for (final Method method : classToSift.getMethods()) {
+
+            if (!method.getDeclaringClass().equals(Object.class) && returnTypes.contains(method.getReturnType())) {
                 methods.add(method);
             }
         }
