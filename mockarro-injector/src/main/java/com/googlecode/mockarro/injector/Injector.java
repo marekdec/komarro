@@ -1,5 +1,7 @@
 package com.googlecode.mockarro.injector;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 public class Injector {
@@ -19,13 +21,13 @@ public class Injector {
     }
 
 
-    public void andInject(final Object systemUnderTest, final Object... mocks) {
-        inject(systemUnderTest, mocks);
+    public Set<Object> andInject(final Object systemUnderTest, final Object... mocks) {
+        return inject(systemUnderTest, mocks);
     }
 
 
-    public void inject(final Object systemUnderTest, final Object... mocks) {
-        injectionEngine.inject(systemUnderTest, injectionPoint, mocks);
+    public Set<Object> inject(final Object systemUnderTest, final Object... mocks) {
+        return injectionEngine.inject(systemUnderTest, injectionPoint, mocks);
     }
 
     public static class InjectorBuilder {
