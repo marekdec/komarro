@@ -35,11 +35,12 @@ public class Mockarro {
     }
 
 
-    public BehaviorRegistration requests(final Class<?> typeOfRequestedValue) {
-        return new BehaviorRegistration(mocks, typeOfRequestedValue);
+
+    public <T> BehaviorRegistration<T> requests(final Class<T> typeOfRequestedValue) {
+        return new BehaviorRegistration<T>(mocks, typeOfRequestedValue);
     }
 
-    public static class BehaviorRegistration {
+    public static class BehaviorRegistration<T> {
         private final Set<Object>         mocks;
 
         private final Class<?>            returnType;
@@ -53,7 +54,7 @@ public class Mockarro {
         }
 
 
-        public void thenReturn(final Object recordedValue) {
+        public void thenReturn(final T recordedValue) {
             for (final Object mock : mocks) {
 
                 for (final Method method : methodsOf(mock).thatReturn(returnType).asSet()) {

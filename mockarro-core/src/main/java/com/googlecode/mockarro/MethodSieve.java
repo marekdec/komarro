@@ -1,7 +1,9 @@
 package com.googlecode.mockarro;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class MethodSieve {
@@ -40,8 +42,16 @@ public class MethodSieve {
     public Set<Method> asSet() {
         final Set<Method> methods = new HashSet<Method>();
 
-
         for (final Method method : classToSift.getMethods()) {
+
+
+            if (method.getReturnType().equals(List.class)) {
+                final ParameterizedType integerListType = (ParameterizedType) method.getGenericReturnType();
+                final Class<?> integerListClass = (Class<?>) integerListType.getActualTypeArguments()[0];
+                System.out.println(integerListClass); // class
+                // java.lang.Integer.
+            }
+
 
             if (!method.getDeclaringClass().equals(Object.class) && returnTypes.contains(method.getReturnType())) {
                 methods.add(method);
