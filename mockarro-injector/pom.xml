@@ -16,7 +16,7 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>1.8.5</version>
-            <scope>optional</scope>
+            <optional>true</optional>
         </dependency>
 
 

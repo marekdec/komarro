@@ -21,16 +21,27 @@ public class MockitoMockRecorder {
         try {
             when(method.invoke(mock, createParams(method.getParameterTypes()))).thenReturn(value);
         } catch (final IllegalAccessException e) {
-            e.printStackTrace();
+            reportRecordError(mock, method, value, e);
         } catch (final InvocationTargetException e) {
-            e.printStackTrace();
+            reportRecordError(mock, method, value, e);
         }
+    }
+
+
+    private void reportRecordError(final Object mock, final Method method, final Object value, final Throwable e) {
+        throw new IllegalStateException("Cannot record behavior for method " + method + " that belongs to " + mock
+                + " with return value " + value, e);
     }
 
 
     private Object[] createParams(final Class<?>[] paramTypes) {
         final Object[] params = new Object[paramTypes.length];
 
+        // It is necessary to treat primitives in a different way. anyObject
+        // method may return null, and this causes the method invocation to fail
+        // as the given arguments are not of a required type (null cannot be
+        // translated to a primitive by the invoke method and it throws an
+        // exception).
         for (int i = 0; i < paramTypes.length; i++) {
             if (paramTypes[i].equals(int.class)) {
                 params[i] = anyInt();

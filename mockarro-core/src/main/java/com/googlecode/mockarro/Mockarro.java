@@ -57,7 +57,9 @@ public class Mockarro {
             for (final Object mock : mocks) {
 
                 for (final Method method : methodsOf(mock).thatReturn(returnType).asSet()) {
-                    recorder.record(mock, method, recordedValue);
+                    if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
+                        recorder.record(mock, method, recordedValue);
+                    }
                 }
             }
         }
