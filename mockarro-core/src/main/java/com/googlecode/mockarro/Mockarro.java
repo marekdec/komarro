@@ -8,25 +8,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import com.googlecode.mockarro.injector.InjectionEngine.Injection;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
 
 public class Mockarro {
 
-    private static Map<Object, Set<Object>> mocksBySut = new WeakHashMap<Object, Set<Object>>();
+    private static Map<Object, Set<Injection>> mocksBySut = new WeakHashMap<Object, Set<Injection>>();
 
-    private final Set<Object>               mocks;
+    private final Set<Injection>               mockDescription;
 
 
     public static void initSut(final Object systemUnderTest) {
-        final Set<Object> injectedMocks = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
+        final Set<Injection> injections = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
                 systemUnderTest);
-        mocksBySut.put(systemUnderTest, injectedMocks);
+        mocksBySut.put(systemUnderTest, injections);
     }
 
 
-    private Mockarro(final Set<Object> mocks) {
+    private Mockarro(final Set<Injection> mocks) {
         super();
-        this.mocks = mocks;
+        this.mockDescription = mocks;
     }
 
 
@@ -37,17 +38,17 @@ public class Mockarro {
 
 
     public <T> BehaviorRegistration<T> requests(final Class<T> typeOfRequestedValue) {
-        return new BehaviorRegistration<T>(mocks, typeOfRequestedValue);
+        return new BehaviorRegistration<T>(mockDescription, typeOfRequestedValue);
     }
 
     public static class BehaviorRegistration<T> {
-        private final Set<Object>         mocks;
+        private final Set<Injection>      mocks;
 
         private final Class<?>            returnType;
         private final MockitoMockRecorder recorder = new MockitoMockRecorder();
 
 
-        private BehaviorRegistration(final Set<Object> mocks, final Class<?> returnType) {
+        private BehaviorRegistration(final Set<Injection> mocks, final Class<?> returnType) {
             super();
             this.mocks = mocks;
             this.returnType = returnType;
@@ -55,11 +56,11 @@ public class Mockarro {
 
 
         public void thenReturn(final T recordedValue) {
-            for (final Object mock : mocks) {
+            for (final Injection mockDescription : mocks) {
 
-                for (final Method method : methodsOf(mock).thatReturn(returnType).asSet()) {
+                for (final Method method : methodsOf(mockDescription.actualClass()).thatReturn(returnType).asSet()) {
                     if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
-                        recorder.record(mock, method, recordedValue);
+                        recorder.record(mockDescription.getMock(), method, recordedValue);
                     }
                 }
             }

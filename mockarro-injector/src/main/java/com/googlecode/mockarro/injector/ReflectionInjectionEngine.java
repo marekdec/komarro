@@ -36,9 +36,10 @@ public class ReflectionInjectionEngine implements InjectionEngine {
      * Throws {@link NullPointerException} is given system under test or
      * injection point is null.
      */
-    public Set<Object> inject(final Object systemUnderTest, final InjectionPoint injectionPoint, final Object... mocks) {
+    public Set<Injection> inject(final Object systemUnderTest, final InjectionPoint injectionPoint,
+            final Object... mocks) {
 
-        final Set<Object> createdMocks = new HashSet<Object>();
+        final Set<Injection> createdMocks = new HashSet<Injection>();
 
         injectElements(asList(systemUnderTest.getClass().getDeclaredFields()), systemUnderTest, injectionPoint,
                 new InjectElementFunction<Field>() {
@@ -46,7 +47,7 @@ public class ReflectionInjectionEngine implements InjectionEngine {
                     public void execute(final Field field) {
                         try {
                             final Object mock = mockEngine.createMock(field.getType());
-                            createdMocks.add(mock);
+                            createdMocks.add(new Injection(mock, field.getType()));
                             field.set(systemUnderTest, mock);
                         } catch (final IllegalAccessException e) {
                             throw new IllegalStateException("Setting field " + field.getName() + " in object of class "
@@ -62,7 +63,7 @@ public class ReflectionInjectionEngine implements InjectionEngine {
                         final List<Object> params = new LinkedList<Object>();
                         for (final Class<?> type : method.getParameterTypes()) {
                             final Object mock = mockEngine.createMock(type);
-                            createdMocks.add(mock);
+                            createdMocks.add(new Injection(mock, type));
                             params.add(mock);
                         }
                         try {

@@ -1,15 +1,20 @@
 package com.googlecode.mockarro;
 
+import static java.util.Arrays.asList;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MethodSieve {
 
-    private final Class<?>      classToSift;
-    private final Set<Class<?>> returnTypes = new HashSet<Class<?>>();
+    private final Class<?>       classToSift;
+    private Class<?>             returnType;
+    private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
 
 
     public MethodSieve(final Class<?> classToSift) {
@@ -23,13 +28,21 @@ public class MethodSieve {
     }
 
 
+
     public static MethodSieve methodsOf(final Class<?> classToSift) {
         return new MethodSieve(classToSift);
     }
 
 
     public MethodSieve thatReturn(final Class<?> returnType) {
-        returnTypes.add(returnType);
+        this.returnType = returnType;
+        return this;
+    }
+
+
+    public MethodSieve of(final Class<?> genericType, final Class<?>... moreGenericTypes) {
+        this.genericTypes.add(genericType);
+        this.genericTypes.addAll(Arrays.asList(moreGenericTypes));
         return this;
     }
 
@@ -44,17 +57,18 @@ public class MethodSieve {
 
         for (final Method method : classToSift.getMethods()) {
 
-
-            if (method.getReturnType().equals(List.class)) {
-                final ParameterizedType integerListType = (ParameterizedType) method.getGenericReturnType();
-                final Class<?> integerListClass = (Class<?>) integerListType.getActualTypeArguments()[0];
-                System.out.println(integerListClass); // class
-                // java.lang.Integer.
-            }
-
-
-            if (!method.getDeclaringClass().equals(Object.class) && returnTypes.contains(method.getReturnType())) {
-                methods.add(method);
+            if (!method.getDeclaringClass().equals(Object.class) && returnType.equals(method.getReturnType())) {
+                if (!genericTypes.isEmpty()) {
+                    final ParameterizedType methodGenericReturnType = ParameterizedType.class.cast(method
+                            .getGenericReturnType());
+                    if (methodGenericReturnType != null) {
+                        if (genericTypes.equals(asList(methodGenericReturnType.getActualTypeArguments()))) {
+                            methods.add(method);
+                        }
+                    }
+                } else {
+                    methods.add(method);
+                }
             }
         }
 

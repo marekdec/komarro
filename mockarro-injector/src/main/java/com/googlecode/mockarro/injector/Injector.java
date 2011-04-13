@@ -4,6 +4,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.googlecode.mockarro.injector.InjectionEngine.Injection;
+
 public class Injector {
 
     private final InjectionEngine injectionEngine;
@@ -21,12 +23,12 @@ public class Injector {
     }
 
 
-    public Set<Object> andInject(final Object systemUnderTest, final Object... mocks) {
+    public Set<Injection> andInject(final Object systemUnderTest, final Object... mocks) {
         return inject(systemUnderTest, mocks);
     }
 
 
-    public Set<Object> inject(final Object systemUnderTest, final Object... mocks) {
+    public Set<Injection> inject(final Object systemUnderTest, final Object... mocks) {
         return injectionEngine.inject(systemUnderTest, injectionPoint, mocks);
     }
 
