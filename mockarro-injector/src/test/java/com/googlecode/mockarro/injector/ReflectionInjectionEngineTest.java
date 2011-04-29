@@ -7,7 +7,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import javax.inject.Inject;
 
 import org.mockito.Mock;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.googlecode.mockarro.test.SystemUnderTest;
@@ -20,7 +20,7 @@ public class ReflectionInjectionEngineTest {
     private ReflectionInjectionEngine engine;
 
 
-    @BeforeTest
+    @BeforeMethod
     public void init() {
         initMocks(this);
     }
@@ -29,8 +29,8 @@ public class ReflectionInjectionEngineTest {
     @Test
     public void injectNotAccessibleObjects() {
         // prepare
-        when(mockedMockEngine.createMock(Object.class)).thenReturn(new Object()).thenReturn(new Object()).thenReturn(
-                new Object());
+        when(mockedMockEngine.createMock(Object.class)).thenReturn(new Object()).thenReturn(new Object())
+                .thenReturn(new Object());
         engine = new ReflectionInjectionEngine(mockedMockEngine);
 
         final SystemUnderTest sut = new SystemUnderTest();
