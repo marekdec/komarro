@@ -8,6 +8,15 @@
     </parent>
     <artifactId>mockarro-injector</artifactId>
 
+    <distributionManagement>
+        <site>
+            <id>google.download</id>
+            <name>googlecode scm</name>
+            <url>scm:svn:https://mockarro.googlecode.com/svn/trunk/mockarro-injector/site</url>
+        </site>
+    </distributionManagement>
+
+
     <dependencies>
         <dependency>
             <groupId>javax.inject</groupId>

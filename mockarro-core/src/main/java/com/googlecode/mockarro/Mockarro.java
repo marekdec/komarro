@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import com.googlecode.mockarro.injector.InjectionEngine.Injection;
+import com.googlecode.mockarro.injector.InjectionPoint;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
 
 public class Mockarro<T> {
@@ -41,6 +42,26 @@ public class Mockarro<T> {
         mocksByThread.put(Thread.currentThread(), injections);
     }
 
+
+    /**
+     * Initialises Mockarro for given system under test and specifies the
+     * injection point. Its basic task is to reset the test by creating and
+     * injecting mocks into the system under test.
+     * <p>
+     * This method has to be invoked before every single test execution -
+     * preferably within a before method (a method annotated with @Before in
+     * JUnit 4.x or @BeforeMethod in TestNG).
+     * 
+     * @param systemUnderTest
+     *            the unit that is going to be tested.
+     * @param injectionPoint
+     *            the injection point.
+     */
+    public static void initSut(final Object systemUnderTest, final InjectionPoint injectionPoint) {
+        final Set<Injection> injections = withMockEngine(new MockitoMockEngine()).withInjectionPointAt(injectionPoint)
+                .createInjector().andInject(systemUnderTest);
+        mocksByThread.put(Thread.currentThread(), injections);
+    }
 
 
 
