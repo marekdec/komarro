@@ -4,15 +4,23 @@ import static com.googlecode.mockarro.MethodSieve.methodsOf;
 import static com.googlecode.mockarro.injector.Injector.withMockEngine;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import com.googlecode.mockarro.injector.InjectionEngine.Injection;
 import com.googlecode.mockarro.injector.InjectionPoint;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
+import com.googlecode.mockarro.injector.InjectionEngine.Injection;
 
+/**
+ * A utility class that provides basic Mockarro functionality.
+ * 
+ * @author marekdec
+ */
 public class Mockarro<T> {
 
     private static Map<Thread, Set<Injection>> mocksByThread = Collections
@@ -22,6 +30,8 @@ public class Mockarro<T> {
 
     private final Class<?>                     returnType;
     private final MockitoMockRecorder          recorder      = new MockitoMockRecorder();
+
+    private final List<Class<?>>               genericTypes  = new ArrayList<Class<?>>();
 
 
     /**
@@ -40,6 +50,24 @@ public class Mockarro<T> {
         final Set<Injection> injections = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
                 systemUnderTest);
         mocksByThread.put(Thread.currentThread(), injections);
+    }
+
+
+    /**
+     * Sets one or more generic parameters of the return type.
+     * <p>
+     * TODO: provide api for nested generics
+     * 
+     * @param genericType
+     *            first generic types
+     * @param moreGenericTypes
+     *            following generic types
+     * @return self
+     */
+    public Mockarro<T> of(final Class<?> genericType, final Class<?>... moreGenericTypes) {
+        this.genericTypes.add(genericType);
+        this.genericTypes.addAll(Arrays.asList(moreGenericTypes));
+        return this;
     }
 
 
@@ -111,9 +139,12 @@ public class Mockarro<T> {
      *            defined type.
      */
     public void thenReturn(final T recordedValue) {
+        final Class<?>[] zeroOrMoreGenericTypes = genericTypes.toArray(new Class<?>[genericTypes.size()]);
+
         for (final Injection mockDescription : mocks) {
 
-            for (final Method method : methodsOf(mockDescription.actualClass()).thatReturn(returnType).asSet()) {
+            for (final Method method : methodsOf(mockDescription.actualClass()).of(zeroOrMoreGenericTypes).thatReturn(
+                    returnType).asSet()) {
                 if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
                     recorder.record(mockDescription.getMock(), method, recordedValue);
                 }

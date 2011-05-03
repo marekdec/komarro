@@ -5,11 +5,18 @@ import static java.util.Arrays.asList;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A sieve that is capable of filtering methods of a given class using specified
+ * criteria.
+ * <p>
+ * TODO: provide examples of usage here.
+ * 
+ * @author marekdec
+ */
 public class MethodSieve {
 
     private final Class<?>       classToSift;
@@ -17,38 +24,52 @@ public class MethodSieve {
     private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
 
 
-    public MethodSieve(final Class<?> classToSift) {
+    private MethodSieve(final Class<?> classToSift) {
         super();
         this.classToSift = classToSift;
     }
 
 
+    /**
+     * Initializes the sieve with the class of given object.
+     * 
+     * @param objectToSift
+     *            object that will initialize the sieve with its class.
+     * @return a new methods sieve
+     */
     public static MethodSieve methodsOf(final Object objectToSift) {
         return new MethodSieve(objectToSift.getClass());
     }
 
 
-
+    /**
+     * Initializes the sieve with given class.
+     * 
+     * @param classToSift
+     *            a class to sift
+     * @return a new methods sieve
+     */
     public static MethodSieve methodsOf(final Class<?> classToSift) {
         return new MethodSieve(classToSift);
     }
 
 
+    /**
+     * Defines expected return type criteria
+     * 
+     * @param returnType
+     *            the return type of the methods
+     * @return self
+     */
     public MethodSieve thatReturn(final Class<?> returnType) {
         this.returnType = returnType;
         return this;
     }
 
 
-    public MethodSieve of(final Class<?> genericType, final Class<?>... moreGenericTypes) {
-        this.genericTypes.add(genericType);
-        this.genericTypes.addAll(Arrays.asList(moreGenericTypes));
+    public MethodSieve of(final Class<?>... genericTypes) {
+        this.genericTypes.addAll(asList(genericTypes));
         return this;
-    }
-
-
-    public MethodSieve withParameter() {
-        throw new IllegalStateException("Not implemented yet!");
     }
 
 
