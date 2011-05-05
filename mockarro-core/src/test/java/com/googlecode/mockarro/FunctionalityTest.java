@@ -1,7 +1,7 @@
 package com.googlecode.mockarro;
 
+import static com.googlecode.mockarro.Mockarro.given;
 import static com.googlecode.mockarro.Mockarro.initSut;
-import static com.googlecode.mockarro.Mockarro.whenRequested;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.testng.annotations.Test;
@@ -16,7 +16,7 @@ public class FunctionalityTest {
     @Test
     public void testMockingFunctionality() {
         initSut(sut);
-        whenRequested(int.class).thenReturn(4);
+        given(int.class).isRequested().thenReturn(4);
 
         final int result = sut.squarePlusOne(12);
 

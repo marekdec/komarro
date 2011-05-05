@@ -17,7 +17,24 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
 import com.googlecode.mockarro.injector.InjectionEngine.Injection;
 
 /**
- * A utility class that provides basic Mockarro functionality.
+ * A utility class that provides basic Mockarro functionality. <br>
+ * <p>
+ * 
+ * In order to stub all methods of the collaborators that return objects of
+ * SomeClass to return someObject use a static import statement to import the
+ * <b>Mockarro.<i>given</i></b> method and use following syntax:
+ * <p>
+ * <code>
+ * {@code given(someClass.class).isRequested().thenReturn(someObject);}
+ * </code>
+ * <p>
+ * A synonym was defined for above declaration. It should be used when there is
+ * a name class with other statically imported methods named <i>given</i>. The
+ * outcome of both declarations is identical.
+ * <p>
+ * <code>
+ * {@code givenObjectOf(someClass.class).isRequested().thenReturn(someObject);}
+ * </code>
  * 
  * @author marekdec
  */
@@ -26,12 +43,11 @@ public class Mockarro<T> {
     private static Map<Thread, Set<Injection>> mocksByThread = Collections
                                                                      .synchronizedMap(new WeakHashMap<Thread, Set<Injection>>());
 
+
+    private final List<Class<?>>               genericTypes  = new ArrayList<Class<?>>();
     private final Set<Injection>               mocks;
 
     private final Class<?>                     returnType;
-    private final MockitoMockRecorder          recorder      = new MockitoMockRecorder();
-
-    private final List<Class<?>>               genericTypes  = new ArrayList<Class<?>>();
 
 
     /**
@@ -110,7 +126,7 @@ public class Mockarro<T> {
      *            object is of a primitive integer type use int.class, etc.
      * @return a Mockarro object that can be used for ongoing stubbing.
      */
-    public static <T> Mockarro<T> whenRequested(final Class<T> typeOfRequestedValue) {
+    public static <T> Mockarro<T> given(final Class<T> typeOfRequestedValue) {
         final Set<Injection> mockDescription = mocksByThread.get(Thread.currentThread());
         if (mockDescription == null) {
             throw new IllegalStateException(
@@ -119,6 +135,35 @@ public class Mockarro<T> {
         return new Mockarro<T>(mockDescription, typeOfRequestedValue);
     }
 
+
+    /**
+     * A synonym for {@link #given(Class)}. Should replace <i>given</i> every
+     * time there is a name conflict with another <i>given</i> method imported
+     * statically. The main intention was to avoid a name clash with
+     * BDDMockito's <i>given</i> method.
+     * 
+     * @param <T>
+     *            will be automatically inferred.
+     * @param typeOfRequestedValue
+     *            The type literal i.e. class or primitive literal. For example
+     *            if the requested type is of MyClass type the
+     *            typeOfRequestedValue will be MyClass.class, if the requested
+     *            object is of a primitive integer type use int.class, etc.
+     * @return
+     */
+    public static <T> Mockarro<T> givenObjectOf(final Class<T> typeOfRequestedValue) {
+        return given(typeOfRequestedValue);
+    }
+
+
+    /**
+     * Prepares the stubbing to be recorded.
+     * 
+     * @return a new Stubbing
+     */
+    public Stubbing<T> isRequested() {
+        return new Stubbing<T>(mocks, genericTypes, returnType);
+    }
 
 
 
@@ -129,24 +174,42 @@ public class Mockarro<T> {
     }
 
 
-    /**
-     * Defines the value that will be returned when object of defined type is
-     * requested.
-     * 
-     * @param recordedValue
-     *            the vale that will be returned by the mocked object when the
-     *            mock object is requested to return the value of previously
-     *            defined type.
-     */
-    public void thenReturn(final T recordedValue) {
-        final Class<?>[] zeroOrMoreGenericTypes = genericTypes.toArray(new Class<?>[genericTypes.size()]);
+    public static class Stubbing<T> {
 
-        for (final Injection mockDescription : mocks) {
+        private final Set<Injection>      mocks;
 
-            for (final Method method : methodsOf(mockDescription.actualClass()).of(zeroOrMoreGenericTypes).thatReturn(
-                    returnType).asSet()) {
-                if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
-                    recorder.record(mockDescription.getMock(), method, recordedValue);
+        private final List<Class<?>>      genericTypes;
+        private final Class<?>            returnType;
+        private final MockitoMockRecorder recorder = new MockitoMockRecorder();
+
+
+        private Stubbing(final Set<Injection> mocks, final List<Class<?>> genericTypes, final Class<?> returnType) {
+            super();
+            this.mocks = mocks;
+            this.genericTypes = genericTypes;
+            this.returnType = returnType;
+        }
+
+
+        /**
+         * Defines the value that will be returned when object of defined type
+         * is requested.
+         * 
+         * @param recordedValue
+         *            the vale that will be returned by the mocked object when
+         *            the mock object is requested to return the value of
+         *            previously defined type.
+         */
+        public void thenReturn(final T recordedValue) {
+            final Class<?>[] zeroOrMoreGenericTypes = genericTypes.toArray(new Class<?>[genericTypes.size()]);
+
+            for (final Injection mockDescription : mocks) {
+
+                for (final Method method : methodsOf(mockDescription.actualClass()).of(zeroOrMoreGenericTypes)
+                        .thatReturn(returnType).asSet()) {
+                    if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
+                        recorder.record(mockDescription.getMock(), method, recordedValue);
+                    }
                 }
             }
         }
