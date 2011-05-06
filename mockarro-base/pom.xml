@@ -60,6 +60,11 @@
 	</distributionManagement>
 
 
+	<modules>
+		<module>mockarro-core</module>
+		<module>mockarro-injector</module>
+	</modules>
+
 	<build>
 		<extensions>
 			<extension>
