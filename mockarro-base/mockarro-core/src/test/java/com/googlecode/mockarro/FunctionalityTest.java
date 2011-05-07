@@ -53,6 +53,6 @@ public class FunctionalityTest {
 
         final List<Integer> result = sut.getFivePowersOf(2);
 
-        assertThat(result).containsSequence(2, 3, 8, 16, 32);
+        assertThat(result).containsSequence(2, 4, 8, 16, 32);
     }
 }
