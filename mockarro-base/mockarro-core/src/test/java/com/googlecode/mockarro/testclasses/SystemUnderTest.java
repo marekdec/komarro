@@ -16,14 +16,8 @@ public class SystemUnderTest {
     }
 
 
-    public Class<?> getHiddenClass() {
-        return HiddenClass.class;
+    public List<Integer> getFivePowersOf(final int base) {
+        return service.listOfMultiplicatons(base, base, base);
     }
 
-
-    private static class HiddenClass {
-        public List<Integer> getList() {
-            return null;
-        }
-    }
 }

@@ -17,6 +17,19 @@ import java.lang.reflect.Method;
 public class MockitoMockRecorder {
 
 
+    /**
+     * Stubs the methods to return specified value.
+     * <p>
+     * TODO: this does not work for variable length parameter lists e.g.
+     * myMethod(int... numbers);
+     * 
+     * @param mock
+     *            a mock object, owner of the method
+     * @param method
+     *            a method to stub
+     * @param value
+     *            the stubbed value that will be returned
+     */
     public void record(final Object mock, final Method method, final Object value) {
         try {
             when(method.invoke(mock, createParams(method.getParameterTypes()))).thenReturn(value);
