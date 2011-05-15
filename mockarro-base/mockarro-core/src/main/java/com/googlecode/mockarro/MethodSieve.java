@@ -1,13 +1,11 @@
 package com.googlecode.mockarro;
 
-import static java.util.Arrays.asList;
+import static com.googlecode.mockarro.TypeLiteral.create;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
 
 /**
  * A sieve that is capable of filtering methods of a given class using specified
@@ -19,9 +17,8 @@ import java.util.Set;
  */
 public class MethodSieve {
 
-    private final Class<?>       classToSift;
-    private Class<?>             returnType;
-    private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
+    private final Class<?> classToSift;
+    private TypeLiteral<?> returnTypeLiteral;
 
 
     private MethodSieve(final Class<?> classToSift) {
@@ -62,34 +59,25 @@ public class MethodSieve {
      * @return self
      */
     public MethodSieve thatReturn(final Class<?> returnType) {
-        this.returnType = returnType;
+        thatReturn(create(returnType));
         return this;
     }
 
 
-    public MethodSieve of(final Class<?>... genericTypes) {
-        this.genericTypes.addAll(asList(genericTypes));
+    public MethodSieve thatReturn(final TypeLiteral<?> returnTypeLiteral) {
+        this.returnTypeLiteral = returnTypeLiteral;
         return this;
     }
+
 
 
     public Set<Method> asSet() {
         final Set<Method> methods = new HashSet<Method>();
 
         for (final Method method : classToSift.getMethods()) {
-
-            if (!method.getDeclaringClass().equals(Object.class) && returnType.equals(method.getReturnType())) {
-                if (!genericTypes.isEmpty()) {
-                    final ParameterizedType methodGenericReturnType = ParameterizedType.class.cast(method
-                            .getGenericReturnType());
-                    if (methodGenericReturnType != null) {
-                        if (genericTypes.equals(asList(methodGenericReturnType.getActualTypeArguments()))) {
-                            methods.add(method);
-                        }
-                    }
-                } else {
-                    methods.add(method);
-                }
+            if (!method.getDeclaringClass().equals(Object.class)
+                    && method.getGenericReturnType().equals(returnTypeLiteral.getType())) {
+                methods.add(method);
             }
         }
 

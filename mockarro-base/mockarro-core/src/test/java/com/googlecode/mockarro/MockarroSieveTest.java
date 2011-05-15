@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.testng.annotations.Test;
 
+
 public class MockarroSieveTest {
 
     @Test
@@ -26,15 +27,25 @@ public class MockarroSieveTest {
     }
 
 
+    // Some generic classes do not have the generic parameter defined on
+    // purpose
+    @SuppressWarnings("unchecked")
     @Test
     public void siftMethodsSpecifingGenericReturnType() {
-        assertThat(methodsOf(TestClass.class).thatReturn(List.class).of(String.class).asSet()).hasSize(1);
+        assertThat(methodsOf(TestClass.class).thatReturn(new TypeLiteral<Map<String, List<Integer>>>() {}).asSet())
+                .hasSize(1);
+
+        assertThat(methodsOf(TestClass.class).thatReturn(new TypeLiteral<Map>() {}).asSet()).isEmpty();
+        assertThat(methodsOf(TestClass.class).thatReturn(new TypeLiteral<Map<String, List>>() {}).asSet()).isEmpty();
     }
 
 
+    // Some generic classes do not have the generic parameter defined on
+    // purpose
+    @SuppressWarnings("unchecked")
     @Test
-    public void siftMethodsSpecifingGenericReturnTypeWithTwoGenericParamters() {
-        assertThat(methodsOf(TestClass.class).thatReturn(Map.class).of(String.class, Integer.class).asSet()).hasSize(1);
+    public void siftMethodsSpecifingUnsafeGenericType() {
+        assertThat(methodsOf(TestClass.class).thatReturn(new TypeLiteral<List>() {}).asSet()).hasSize(1);
     }
 
     private static class TestClassParent {
@@ -71,12 +82,14 @@ public class MockarroSieveTest {
         }
 
 
-        public List<String> returnListOfStrings() {
-            return new ArrayList<String>();
+        // List's generic parameter is missing on purposes
+        @SuppressWarnings("unchecked")
+        public List returnUnsafeList() {
+            return new ArrayList();
         }
 
 
-        public Map<String, Integer> returnMap() {
+        public Map<String, List<Integer>> returnMap() {
             return null;
         }
     }

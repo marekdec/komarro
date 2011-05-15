@@ -3,9 +3,9 @@ package com.googlecode.mockarro;
 import static com.googlecode.mockarro.Mockarro.given;
 import static com.googlecode.mockarro.Mockarro.givenObjectOf;
 import static com.googlecode.mockarro.Mockarro.initSut;
+import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.testng.annotations.BeforeMethod;
@@ -49,7 +49,7 @@ public class FunctionalityTest {
     @Test
     public void testGenericReturnTypeSelection() {
         initSut(sut);
-        givenObjectOf(List.class).of(Integer.class).isRequested().thenReturn(Arrays.asList(2, 4, 8, 16, 32));
+        givenObjectOf(new TypeLiteral<List<Integer>>() {}).isRequested().thenReturn(asList(2, 4, 8, 16, 32));
 
         final List<Integer> result = sut.getFivePowersOf(2);
 
