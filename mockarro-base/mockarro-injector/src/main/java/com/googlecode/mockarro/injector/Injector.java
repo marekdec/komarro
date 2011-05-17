@@ -6,8 +6,6 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 
-import com.googlecode.mockarro.injector.InjectionEngine.Injection;
-
 public class Injector {
 
     final InjectionEngine injectionEngine;
@@ -32,7 +30,14 @@ public class Injector {
     }
 
 
-    public Set<Injection> andInject(final Object systemUnderTest, final Object... mocks) {
+    /**
+     * A synonym for the {@link #inject(Object, Object...)}method.
+     * 
+     * @param systemUnderTest
+     * @param mocks
+     * @return
+     */
+    public Set<MockDescriptor> andInject(final Object systemUnderTest, final MockDescriptor... mocks) {
         return inject(systemUnderTest, mocks);
     }
 
@@ -50,7 +55,7 @@ public class Injector {
      *            engine
      * @return a set of objects of the {@link Injection} type
      */
-    public Set<Injection> inject(final Object systemUnderTest, final Object... mocks) {
+    public Set<MockDescriptor> inject(final Object systemUnderTest, final MockDescriptor... mocks) {
         return injectionEngine.inject(systemUnderTest, injectionPoint, mocks);
     }
 

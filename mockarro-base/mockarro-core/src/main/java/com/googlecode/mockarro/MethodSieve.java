@@ -27,17 +27,6 @@ public class MethodSieve {
     }
 
 
-    /**
-     * Initializes the sieve with the class of given object.
-     * 
-     * @param objectToSift
-     *            object that will initialize the sieve with its class.
-     * @return a new methods sieve
-     */
-    public static MethodSieve methodsOf(final Object objectToSift) {
-        return new MethodSieve(objectToSift.getClass());
-    }
-
 
     /**
      * Initializes the sieve with given class.
@@ -75,6 +64,7 @@ public class MethodSieve {
         final Set<Method> methods = new HashSet<Method>();
 
         for (final Method method : classToSift.getMethods()) {
+
             if (!method.getDeclaringClass().equals(Object.class)
                     && method.getGenericReturnType().equals(returnTypeLiteral.getType())) {
                 methods.add(method);

@@ -12,12 +12,17 @@ public class SystemUnderTest {
 
 
     public int squarePlusOne(final int base) {
-        return service.multiplier(base, base) + 1;
+        return getService().multiplier(base, base) + 1;
     }
 
 
     public List<Integer> getFivePowersOf(final int base) {
-        return service.listOfMultiplicatons(base, base, base);
+        return getService().listOfMultiplicatons(base, base, base);
+    }
+
+
+    public MultiplierService getService() {
+        return service;
     }
 
 }

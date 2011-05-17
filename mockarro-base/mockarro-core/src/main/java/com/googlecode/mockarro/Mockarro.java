@@ -12,15 +12,22 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import com.googlecode.mockarro.injector.InjectionPoint;
+import com.googlecode.mockarro.injector.MockDescriptor;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
-import com.googlecode.mockarro.injector.InjectionEngine.Injection;
 
 /**
- * A utility class that provides basic Mockarro functionality. <br>
+ * A utility that makes a definition of a test indirect input possible without
+ * any need to know the the actual implementation of the unit under test. <br>
  * <p>
- * 
- * In order to stub all methods of the collaborators that return objects of
- * SomeClass to return someObject use a static import statement to import the
+ * The {@link #initSut(Object, MockDescriptor...)} method should be invoked
+ * before every test method. The initSut method injects the object under test
+ * with mocked dependencies. The mock dependencies can be either passed to the
+ * initSut method in form of {@link MockDescriptor}s or they can be omitted.
+ * Every mock that is omitted (and is requeried by the sut) will be created
+ * using the default the {@link MockitoMockEngine}.
+ * <p>
+ * In order to define the indirect input to a tested method of type SomeClass to
+ * be equal to someObject use a static import statement to import the
  * <b>Mockarro.<i>given</i></b> method and use following syntax:
  * <p>
  * <code>
@@ -49,14 +56,14 @@ import com.googlecode.mockarro.injector.InjectionEngine.Injection;
  */
 public class Mockarro<T> {
 
-    private static Map<Thread, Set<Injection>> mocksByThread = Collections
-                                                                     .synchronizedMap(new WeakHashMap<Thread, Set<Injection>>());
+    private static Map<Thread, Set<MockDescriptor>> mocksByThread = Collections
+                                                                          .synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
 
 
-    private final List<Class<?>>               genericTypes  = new ArrayList<Class<?>>();
-    private final Set<Injection>               mocks;
+    private final List<Class<?>>                    genericTypes  = new ArrayList<Class<?>>();
+    private final Set<MockDescriptor>               mocks;
 
-    private final TypeLiteral<?>               returnTypeLiteral;
+    private final TypeLiteral<?>                    returnTypeLiteral;
 
 
     /**
@@ -70,10 +77,12 @@ public class Mockarro<T> {
      * 
      * @param systemUnderTest
      *            the unit that is going to be tested.
+     * @param mocks
+     *            descriptors of the user managed mocks that are to be injected
      */
-    public static void initSut(final Object systemUnderTest) {
-        final Set<Injection> injections = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
-                systemUnderTest);
+    public static void initSut(final Object systemUnderTest, final MockDescriptor... mocks) {
+        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
+                systemUnderTest, mocks);
         mocksByThread.put(Thread.currentThread(), injections);
     }
 
@@ -92,10 +101,13 @@ public class Mockarro<T> {
      *            the unit that is going to be tested.
      * @param injectionPoint
      *            the injection point.
+     * @param mocks
+     *            descriptors of the user managed mocks that are to be injected
      */
-    public static void initSut(final Object systemUnderTest, final InjectionPoint injectionPoint) {
-        final Set<Injection> injections = withMockEngine(new MockitoMockEngine()).withInjectionPointAt(injectionPoint)
-                .createInjector().andInject(systemUnderTest);
+    public static void initSut(final Object systemUnderTest, final InjectionPoint injectionPoint,
+            final MockDescriptor... mocks) {
+        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine()).withInjectionPointAt(
+                injectionPoint).createInjector().andInject(systemUnderTest, mocks);
         mocksByThread.put(Thread.currentThread(), injections);
     }
 
@@ -119,7 +131,7 @@ public class Mockarro<T> {
      * @return a Mockarro object that can be used for ongoing stubbing.
      */
     public static <T> Mockarro<T> given(final TypeLiteral<T> typeOfRequestedValue) {
-        final Set<Injection> mockDescription = mocksByThread.get(Thread.currentThread());
+        final Set<MockDescriptor> mockDescription = mocksByThread.get(Thread.currentThread());
         if (mockDescription == null) {
             throw new IllegalStateException(
                     "The mockarro test has not been initialized yet.\nAre you sure you have called the init method with the current unit under test as the parameter?");
@@ -184,7 +196,7 @@ public class Mockarro<T> {
 
 
 
-    private Mockarro(final Set<Injection> mocks, final TypeLiteral<?> returnTypeLiteral) {
+    private Mockarro(final Set<MockDescriptor> mocks, final TypeLiteral<?> returnTypeLiteral) {
         super();
         this.mocks = mocks;
         this.returnTypeLiteral = returnTypeLiteral;
@@ -193,13 +205,13 @@ public class Mockarro<T> {
 
     public static class Stubbing<T> {
 
-        private final Set<Injection>      mocks;
+        private final Set<MockDescriptor> mocks;
 
         private final TypeLiteral<?>      returnTypeLiteral;
         private final MockitoMockRecorder recorder = new MockitoMockRecorder();
 
 
-        private Stubbing(final Set<Injection> mocks, final List<Class<?>> genericTypes,
+        private Stubbing(final Set<MockDescriptor> mocks, final List<Class<?>> genericTypes,
                 final TypeLiteral<?> returnTypeLiteral) {
             super();
             this.mocks = mocks;
@@ -218,12 +230,12 @@ public class Mockarro<T> {
          */
         public void thenReturn(final T recordedValue) {
 
-            for (final Injection mockDescription : mocks) {
+            for (final MockDescriptor descriptor : mocks) {
 
-                for (final Method method : methodsOf(mockDescription.actualClass()).thatReturn(returnTypeLiteral)
+                for (final Method method : methodsOf((Class<?>) descriptor.getType()).thatReturn(returnTypeLiteral)
                         .asSet()) {
                     if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
-                        recorder.record(mockDescription.getMock(), method, recordedValue);
+                        recorder.record(descriptor.getMock(), method, recordedValue);
                     }
                 }
             }
