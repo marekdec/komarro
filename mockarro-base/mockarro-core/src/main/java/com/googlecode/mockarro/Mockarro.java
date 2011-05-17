@@ -17,14 +17,25 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
 
 /**
  * A utility that makes a definition of a test indirect input possible without
- * any need to know the the actual implementation of the unit under test. <br>
+ * knowing anything about the the actual implementation of the unit under test. <br>
  * <p>
  * The {@link #initSut(Object, MockDescriptor...)} method should be invoked
- * before every test method. The initSut method injects the object under test
- * with mocked dependencies. The mock dependencies can be either passed to the
- * initSut method in form of {@link MockDescriptor}s or they can be omitted.
- * Every mock that is omitted (and is requeried by the sut) will be created
- * using the default the {@link MockitoMockEngine}.
+ * before every test method in order to initialize and reset the Mockarro
+ * engine. The initSut method injects the object under test with mocked
+ * dependencies. The mock dependencies can be either passed to the initSut
+ * method in form of {@link MockDescriptor}s or they can be omitted. Every mock
+ * that is omitted (and is requeried by the sut) will be created using the
+ * default the {@link MockitoMockEngine}.
+ * <p>
+ * It is also possible to discover Mockito annotated mocks and to use them to
+ * initialize Mockarro. Use following idiom in order to do so:<br>
+ * <code>
+ * {@code initSut(systemUnderTest, annotatedMocks(this))};
+ * </code><br>
+ * Note that the {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
+ * method is inteded to be statically imported from
+ * {@link MockitoMockDescriptionCreator} utility class.
+ * <p>
  * <p>
  * In order to define the indirect input to a tested method of type SomeClass to
  * be equal to someObject use a static import statement to import the
@@ -52,7 +63,7 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
  * to retain generic class information at runtime by creating an anonymous
  * subtype of the generic {@link TypeLiteral}.
  * 
- * @author marekdec
+ * @author Marek Dec
  */
 public class Mockarro<T> {
 
