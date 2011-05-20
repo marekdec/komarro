@@ -65,7 +65,7 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
  * 
  * @author Marek Dec
  */
-public class Mockarro<T> {
+public final class Mockarro<T> {
 
     private static Map<Thread, Set<MockDescriptor>> mocksByThread = Collections
                                                                           .synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
@@ -117,8 +117,8 @@ public class Mockarro<T> {
      */
     public static void initSut(final Object systemUnderTest, final InjectionPoint injectionPoint,
             final MockDescriptor... mocks) {
-        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine()).withInjectionPointAt(
-                injectionPoint).createInjector().andInject(systemUnderTest, mocks);
+        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine())
+                .withInjectionPointAt(injectionPoint).createInjector().andInject(systemUnderTest, mocks);
         mocksByThread.put(Thread.currentThread(), injections);
     }
 

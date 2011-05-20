@@ -6,7 +6,7 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 
-public class Injector {
+public final class Injector {
 
     final InjectionEngine injectionEngine;
     final InjectionPoint  injectionPoint;
@@ -64,7 +64,7 @@ public class Injector {
      * 
      * @author marekdec
      */
-    public static class InjectorBuilder {
+    public final static class InjectorBuilder {
 
         /**
          * Defines a list of popular injection annotations e.g. JEE6 @Inject,

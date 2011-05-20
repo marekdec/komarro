@@ -2,10 +2,10 @@ package com.googlecode.mockarro.injector;
 
 import static org.mockito.Mockito.mock;
 
-public class MockitoMockEngine implements MockEngine {
+public final class MockitoMockEngine implements MockEngine {
 
-	public <T> T createMock(Class<T> classToMock) {
-		return mock(classToMock);
-	}
+    public <T> T createMock(final Class<T> classToMock) {
+        return mock(classToMock);
+    }
 
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * 
  * @author marekdec
  */
-public class AnnotatedInjectionPoint implements InjectionPoint {
+public final class AnnotatedInjectionPoint implements InjectionPoint {
     private final Class<? extends Annotation>             annotation;
 
 

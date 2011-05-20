@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class MockitoMockRecorder {
+final class MockitoMockRecorder {
 
 
     /**

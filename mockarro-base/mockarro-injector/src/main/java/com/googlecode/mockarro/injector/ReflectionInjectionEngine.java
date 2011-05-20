@@ -20,7 +20,7 @@ import java.util.Set;
  * 
  * @author marekdec
  */
-public class ReflectionInjectionEngine implements InjectionEngine {
+public final class ReflectionInjectionEngine implements InjectionEngine {
 
 
     private final MockEngine mockEngine;
@@ -52,8 +52,8 @@ public class ReflectionInjectionEngine implements InjectionEngine {
 
                     public void execute(final Field field) {
                         try {
-                            final MockDescriptor descriptor = mockRepository.assignMock(field.getType(), field
-                                    .getName());
+                            final MockDescriptor descriptor = mockRepository.assignMock(field.getType(),
+                                    field.getName());
                             createdMocks.add(descriptor);
                             field.set(systemUnderTest, descriptor.getMock());
                         } catch (final IllegalAccessException e) {

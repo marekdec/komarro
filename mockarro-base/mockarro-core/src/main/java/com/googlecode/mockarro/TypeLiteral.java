@@ -15,14 +15,14 @@ import java.lang.reflect.Type;
  * {@code new TypeLiteral<SomeGenericClass<Parameter>>() {};}
  * </code>
  * <p>
- * For example following declaration allows retaining the informtion about the
+ * For example following declaration allows retaining the information about the
  * types of the map parameters:
  * <p>
  * <code>
  * {@code new TypeLiteral<Map<String, List<Integer>>>() {};}
  * </code>
  * <p>
- * TypeLiteral also provides a static factory method that is inteded to be used
+ * TypeLiteral also provides a static factory method that is intended to be used
  * to specify non-generic class literals. When declaring a non-generic type
  * literal it is preferable to use the {@link #create(Class)} factory method.
  * 
@@ -66,7 +66,8 @@ public abstract class TypeLiteral<T> {
      * @return a new subclass of TypeLiteral
      */
     public static <T> TypeLiteral<T> create(final Class<T> clazz) {
-        return new TypeLiteral<T>(clazz) {};
+        return new TypeLiteral<T>(clazz) {
+        };
     }
 
 

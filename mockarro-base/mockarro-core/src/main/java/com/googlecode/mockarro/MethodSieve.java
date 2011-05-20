@@ -3,8 +3,10 @@ package com.googlecode.mockarro;
 import static com.googlecode.mockarro.TypeLiteral.create;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
+
 
 
 /**
@@ -15,7 +17,7 @@ import java.util.Set;
  * 
  * @author marekdec
  */
-public class MethodSieve {
+final class MethodSieve {
 
     private final Class<?> classToSift;
     private TypeLiteral<?> returnTypeLiteral;
@@ -63,10 +65,11 @@ public class MethodSieve {
     public Set<Method> asSet() {
         final Set<Method> methods = new HashSet<Method>();
 
+        final Type expectedType = returnTypeLiteral.getType();
+
         for (final Method method : classToSift.getMethods()) {
 
-            if (!method.getDeclaringClass().equals(Object.class)
-                    && method.getGenericReturnType().equals(returnTypeLiteral.getType())) {
+            if (!method.getDeclaringClass().equals(Object.class) && method.getGenericReturnType().equals(expectedType)) {
                 methods.add(method);
             }
         }
