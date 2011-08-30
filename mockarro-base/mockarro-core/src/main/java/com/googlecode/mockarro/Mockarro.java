@@ -16,15 +16,18 @@ import com.googlecode.mockarro.injector.MockDescriptor;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
 
 /**
- * A utility that makes a definition of a test indirect input possible without
- * knowing anything about the the actual implementation of the unit under test. <br>
+ * Mockarro provides a way to define test's indirect input without a necessity to 
+ * know the details of the the actual implementation of the unit under test. <br>
+ * In other words, Mockarro makes it possible to test a method of a class that uses 
+ * collaborators without any need to explicitly create collaborators' mock objects.
+ * Instead it gives you a way to define the indirect input of the tested method.  
  * <p>
  * The {@link #initSut(Object, MockDescriptor...)} method should be invoked
  * before every test method in order to initialize and reset the Mockarro
  * engine. The initSut method injects the object under test with mocked
  * dependencies. The mock dependencies can be either passed to the initSut
  * method in form of {@link MockDescriptor}s or they can be omitted. Every mock
- * that is omitted (and is requeried by the sut) will be created using the
+ * that is omitted (and is required by the sut) will be created using the
  * default the {@link MockitoMockEngine}.
  * <p>
  * It is also possible to discover Mockito annotated mocks and to use them to
@@ -33,7 +36,7 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
  * {@code initSut(systemUnderTest, annotatedMocks(this))};
  * </code><br>
  * Note that the {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
- * method is inteded to be statically imported from
+ * method is intended to be statically imported from
  * {@link MockitoMockDescriptionCreator} utility class.
  * <p>
  * <p>
