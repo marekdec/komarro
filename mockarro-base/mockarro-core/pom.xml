@@ -7,6 +7,8 @@
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>mockarro-core</artifactId>
+	<name>mockarro-core</name>
+	<description>A utility that provides a way to define indirect input to a method under test.</description>
 
 	<dependencies>
 		<dependency>

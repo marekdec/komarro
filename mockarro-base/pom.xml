@@ -11,6 +11,8 @@
 	<artifactId>mockarro-base</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<name>mockarro-base</name>
+	<description>The parent maven artifact of the Mockarro utility</description>
 
 	<issueManagement>
 		<system>google</system>
@@ -28,6 +30,7 @@
 		<developerConnection>scm:svn:https://mockarro.googlecode.com/svn/trunk/</developerConnection>
 		<url>http://mockarro.googlecode.com/svn/trunk/</url>
 	</scm>
+	<url>http://mockarro.googlecode.com/</url>
 
 	<developers>
 		<developer>

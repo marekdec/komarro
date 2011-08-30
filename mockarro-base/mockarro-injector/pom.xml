@@ -7,7 +7,9 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>mockarro-injector</artifactId>
-
+    <name>mockarro-injector</name>
+    <description>Creates and injects mocks to the Unit Under Test</description>
+	
     <distributionManagement>
         <site>
             <id>google.download</id>
