@@ -1,11 +1,11 @@
-package com.googlecode.mockarro.injector;
+package com.googlecode.mockarro;
 
 import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-public final class Injector {
+final class Injector {
 
 	final InjectionEngine injectionEngine;
 	final InjectionPoint injectionPoint;
@@ -94,7 +94,7 @@ public final class Injector {
 
 		/**
 		 * Sets the injection engine to use. This parameter is optional. If not
-		 * given it will default to {@link ReflectionInjectionEngine}.
+		 * given it will default to {@link InjectionEngine}.
 		 * 
 		 * @param engine
 		 *            an injection engine to use
@@ -108,10 +108,10 @@ public final class Injector {
 		/**
 		 * Creates the injector using specified parameters or setting defaults
 		 * if no parameters were passed to the builder. By default a
-		 * {@link ReflectionInjectionEngine} is used and the injection point is
-		 * set to a default {@link AnnotatedInjectionPoint}. The annotation used
-		 * to inject mocks is tried to be guessed by searching the classpath for
-		 * a popular injection annotations.
+		 * {@link InjectionEngine} is used and the injection point is set to a
+		 * default {@link AnnotatedInjectionPoint}. The annotation used to
+		 * inject mocks is tried to be guessed by searching the classpath for a
+		 * popular injection annotations.
 		 * <p>
 		 * Throws an {@link IllegalStateException} if no InjectionPoint has been
 		 * specified and no popular injection annotation is found on the
@@ -132,7 +132,7 @@ public final class Injector {
 				}
 			}
 			if (injectionEngine == null) {
-				injectionEngine = new ReflectionInjectionEngine(mockEngine);
+				injectionEngine = new InjectionEngine(mockEngine);
 			}
 
 			return new Injector(injectionEngine, injectionPoint);

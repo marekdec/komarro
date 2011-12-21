@@ -1,4 +1,4 @@
-package com.googlecode.mockarro.injector;
+package com.googlecode.mockarro;
 
 import java.lang.reflect.AccessibleObject;
 

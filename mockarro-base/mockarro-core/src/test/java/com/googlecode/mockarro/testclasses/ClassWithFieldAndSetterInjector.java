@@ -1,8 +1,8 @@
-package com.googlecode.mockarro.test;
+package com.googlecode.mockarro.testclasses;
 
 import javax.inject.Inject;
 
-public class SystemUnderTest {
+public class ClassWithFieldAndSetterInjector {
 
     @Inject
     private Object fieldInjectionPoint;
@@ -33,13 +33,13 @@ public class SystemUnderTest {
     }
 
 
-    public SystemUnderTest() {
+    public ClassWithFieldAndSetterInjector() {
         // Intentionally empty
     }
 
 
     @Inject
-    public SystemUnderTest(final Object mock) {
+    public ClassWithFieldAndSetterInjector(final Object mock) {
         fieldInjectionPoint = mock;
     }
 

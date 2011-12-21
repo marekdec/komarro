@@ -1,6 +1,6 @@
-package com.googlecode.mockarro.injector;
+package com.googlecode.mockarro;
 
-import static com.googlecode.mockarro.injector.MockDescriptor.mockedObject;
+import static com.googlecode.mockarro.MockDescriptor.mockedObject;
 import static java.util.Arrays.asList;
 
 import java.lang.reflect.AccessibleObject;
@@ -21,18 +21,17 @@ import java.util.Set;
  * 
  * @author marekdec
  */
-public final class ReflectionInjectionEngine implements InjectionEngine {
+final class InjectionEngine {
 
 	private final MockEngine mockEngine;
 
-	public ReflectionInjectionEngine(final MockEngine mockEngine) {
+	public InjectionEngine(final MockEngine mockEngine) {
 		super();
 		this.mockEngine = mockEngine;
 	}
 
-	public <T> SutDescriptor<T> createAndInject(
-			Class<T> typeOfSystemUnderTest, InjectionPoint injectionPoint,
-			MockDescriptor... mocks) {
+	public <T> SutDescriptor<T> createAndInject(Class<T> typeOfSystemUnderTest,
+			InjectionPoint injectionPoint, MockDescriptor... mocks) {
 
 		Constructor<?> noArgumentsCtor = null;
 		Constructor<?> injectionCapableCtor = null;
@@ -94,9 +93,8 @@ public final class ReflectionInjectionEngine implements InjectionEngine {
 			@SuppressWarnings("unchecked")
 			T systemUnderTest = (T) injectionCapableCtor
 					.newInstance(mocksForCtorParameters);
-			return new SutDescriptor<T>(inject(systemUnderTest,
-					injectionPoint, createdMocks, mockRepository),
-					systemUnderTest);
+			return new SutDescriptor<T>(inject(systemUnderTest, injectionPoint,
+					createdMocks, mockRepository), systemUnderTest);
 		} catch (InstantiationException e) {
 			throw cannotCreateSutException(typeOfSystemUnderTest);
 		} catch (IllegalAccessException e) {
@@ -115,10 +113,9 @@ public final class ReflectionInjectionEngine implements InjectionEngine {
 			@SuppressWarnings("unchecked")
 			T systemUnderTest = (T) noArgumentsCtor.newInstance();
 
-			return new SutDescriptor<T>(inject(systemUnderTest,
-					injectionPoint, new HashSet<MockDescriptor>(),
-					new MockRepository(asList(mocks), mockEngine)),
-					systemUnderTest);
+			return new SutDescriptor<T>(inject(systemUnderTest, injectionPoint,
+					new HashSet<MockDescriptor>(), new MockRepository(
+							asList(mocks), mockEngine)), systemUnderTest);
 
 		} catch (InstantiationException e) {
 			throw cannotCreateSutException(typeOfSystemUnderTest);

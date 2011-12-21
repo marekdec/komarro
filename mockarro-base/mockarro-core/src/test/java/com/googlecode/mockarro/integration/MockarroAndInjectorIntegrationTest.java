@@ -1,8 +1,8 @@
-package com.googlecode.mockarro;
+package com.googlecode.mockarro.integration;
 
+import static com.googlecode.mockarro.MockDescriptor.mockedObject;
 import static com.googlecode.mockarro.Mockarro.instanceForTesting;
 import static com.googlecode.mockarro.MockitoMockDescriptionCreator.annotatedMocks;
-import static com.googlecode.mockarro.injector.MockDescriptor.mockedObject;
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -41,5 +41,10 @@ public class MockarroAndInjectorIntegrationTest {
 
 		// then
 		assertThat(sut.getService()).isSameAs(multService);
+	}
+
+	@Test
+	public void testConstructorInjection() {
+
 	}
 }

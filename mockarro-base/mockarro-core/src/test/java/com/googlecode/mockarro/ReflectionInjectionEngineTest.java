@@ -1,4 +1,4 @@
-package com.googlecode.mockarro.injector;
+package com.googlecode.mockarro;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -10,14 +10,14 @@ import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.googlecode.mockarro.test.SystemUnderTest;
+import com.googlecode.mockarro.testclasses.ClassWithFieldAndSetterInjector;
 
 public class ReflectionInjectionEngineTest {
 
 	@Mock
 	private MockEngine mockedMockEngine;
 
-	private ReflectionInjectionEngine engine;
+	private InjectionEngine engine;
 
 	@BeforeMethod
 	public void init() {
@@ -30,18 +30,18 @@ public class ReflectionInjectionEngineTest {
 		when(mockedMockEngine.createMock(Object.class))
 				.thenReturn(new Object()).thenReturn(new Object())
 				.thenReturn(new Object());
-		engine = new ReflectionInjectionEngine(mockedMockEngine);
+		engine = new InjectionEngine(mockedMockEngine);
 
 		// when
-		SutDescriptor<SystemUnderTest> sutDescriptor = engine.createAndInject(
-				SystemUnderTest.class,
+		SutDescriptor<ClassWithFieldAndSetterInjector> sutDescriptor = engine.createAndInject(
+				ClassWithFieldAndSetterInjector.class,
 				new AnnotatedInjectionPoint(Inject.class));
 
 		// then
 		assertThat(sutDescriptor).isNotNull();
 		assertThat(sutDescriptor.getSystemUnderTest()).isNotNull();
 
-		SystemUnderTest sut = sutDescriptor.getSystemUnderTest();
+		ClassWithFieldAndSetterInjector sut = sutDescriptor.getSystemUnderTest();
 
 		assertThat(sut.getFieldInjectionPoint()).isNotNull().isInstanceOf(
 				Object.class);

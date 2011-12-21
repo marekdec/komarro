@@ -1,7 +1,7 @@
 package com.googlecode.mockarro;
 
+import static com.googlecode.mockarro.Injector.withMockEngine;
 import static com.googlecode.mockarro.MethodSieve.methodsOf;
-import static com.googlecode.mockarro.injector.Injector.withMockEngine;
 import static java.lang.Thread.currentThread;
 
 import java.lang.reflect.Method;
@@ -11,11 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import com.googlecode.mockarro.injector.InjectionPoint;
-import com.googlecode.mockarro.injector.MockDescriptor;
-import com.googlecode.mockarro.injector.MockitoMockEngine;
-import com.googlecode.mockarro.injector.SutDescriptor;
 
 /**
  * Mockarro provides a way to define test's indirect input without a necessity
@@ -42,12 +37,12 @@ import com.googlecode.mockarro.injector.SutDescriptor;
  * of {@link MockDescriptor}s or they can be omitted. Every collaborator that
  * does not have a mock object specified and passed to the instanceForTesting
  * method (and is required by the sut) will be created using the default the
- * {@link MockitoMockEngine}.
+ * {@link MockEngine}.
  * <p>
  * It is also possible to discover Mockito annotated mocks and to use them to
  * initialize Mockarro. Use following idiom in order to do so:<br>
  * <code>
- * {@code instanceForTesting(typeOfSystemUnderTest, annotatedMocks(this))};
+ * {@code instanceForTesting(tkiedy do ypeOfSystemUnderTest, annotatedMocks(this))};
  * </code><br>
  * Note that the {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
  * method is intended to be statically imported from
@@ -103,8 +98,8 @@ public final class Mockarro<T> {
 	 * is also responsible for the injection of external (mocked) collaborators.
 	 * It is possible to pass the complete set of mocked collaborators to this
 	 * method or just a subset (or an empty set). In the latter case all
-	 * necessary collaborators will be mocked using the default
-	 * {@link MockitoMockEngine}.
+	 * necessary collaborators will be mocked using the default mockito mock
+	 * engine.
 	 * <p>
 	 * This method has to be invoked before every single test execution -
 	 * preferably within a before method (a method annotated with &#064;Before
@@ -120,9 +115,9 @@ public final class Mockarro<T> {
 
 	public static <T> T instanceForTesting(
 			final Class<T> typeOfSystemUnderTest, final MockDescriptor... mocks) {
-		final SutDescriptor<T> sutDescriptor = withMockEngine(
-				new MockitoMockEngine()).createInjector().instantiateAndInject(
-				typeOfSystemUnderTest, mocks);
+		final SutDescriptor<T> sutDescriptor = withMockEngine(new MockEngine())
+				.createInjector().instantiateAndInject(typeOfSystemUnderTest,
+						mocks);
 
 		mocksByThread.put(currentThread(), sutDescriptor.getMocks());
 		return sutDescriptor.getSystemUnderTest();
@@ -135,7 +130,7 @@ public final class Mockarro<T> {
 	 * (mocked) collaborators. It is possible to pass the complete set of mocked
 	 * collaborators to this method or just a subset (or an empty set). In the
 	 * latter case all necessary collaborators will be mocked using the default
-	 * {@link MockitoMockEngine}.
+	 * mockito mock engine.
 	 * <p>
 	 * This method has to be invoked before every single test execution -
 	 * preferably within a before method (a method annotated with &#064;Before
@@ -151,9 +146,8 @@ public final class Mockarro<T> {
 	public static <T> T instanceForTesting(
 			final Class<T> typeOfSystemUnderTest,
 			final InjectionPoint injectionPoint, final MockDescriptor... mocks) {
-		final SutDescriptor<T> sutDescriptor = withMockEngine(
-				new MockitoMockEngine()).withInjectionPointAt(injectionPoint)
-				.createInjector()
+		final SutDescriptor<T> sutDescriptor = withMockEngine(new MockEngine())
+				.withInjectionPointAt(injectionPoint).createInjector()
 				.instantiateAndInject(typeOfSystemUnderTest, mocks);
 
 		mocksByThread.put(currentThread(), sutDescriptor.getMocks());
@@ -185,7 +179,7 @@ public final class Mockarro<T> {
 				.currentThread());
 		if (mockDescription == null) {
 			throw new IllegalStateException(
-					"The mockarro test has not been initialized yet.\nAre you sure the system under has been created using the instanceForTesting method?");
+					"The Mockarro test has not been initialized yet.\nAre you sure the system under has been created using the instanceForTesting method?");
 		}
 		return new Mockarro<T>(mockDescription, typeOfRequestedValue);
 	}
@@ -196,7 +190,7 @@ public final class Mockarro<T> {
 	 * 
 	 * @param typeOfRequestedValue
 	 *            non-generic class literal
-	 * @return ongoing mockarro stubbing
+	 * @return ongoing Mockarro stubbing
 	 */
 	public static <T> Mockarro<T> given(final Class<T> typeOfRequestedValue) {
 		return given(TypeLiteral.create(typeOfRequestedValue));
