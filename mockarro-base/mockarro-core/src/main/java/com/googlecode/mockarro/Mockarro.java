@@ -20,10 +20,11 @@ import com.googlecode.mockarro.injector.SutDescriptor;
 /**
  * Mockarro provides a way to define test's indirect input without a necessity
  * to know the details of the the actual implementation of the unit under test. <br>
- * In other words, Mockarro makes it possible to test a method of a class that
- * uses collaborators without any need to explicitly create collaborators' mock
- * objects. Instead it gives you a way to define the indirect input of the
- * tested method.
+ * In other words, Mockarro makes it possible to test a method of an object in
+ * isolation from the collaborators, while at the same time the test method does
+ * not have to know any details of the collaborators implementation (except for
+ * the return types). Instead it gives you a way to define the indirect input of
+ * the tested method.
  * <p>
  * The {@link #instanceForTesting(Class, MockDescriptor...)} or the
  * {@link #instanceForTesting(Class, InjectionPoint, MockDescriptor...)} method
