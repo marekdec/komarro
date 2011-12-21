@@ -1,25 +1,20 @@
 package com.googlecode.mockarro.injector;
 
-import java.util.Set;
-
-
 public interface InjectionEngine {
 
-    /**
-     * Injects mocks into injection points of a given object.
-     * 
-     * @param systemUnderTest
-     *            the object that is to be injected with the mocks
-     * @param injectionPoint
-     *            defines the injection point
-     * @param mocks
-     *            a list of mocked objected that will be used to populate
-     *            injected fields, if no matching mock is found on this list it
-     *            will be created using the mockEngine.
-     * @return a set of mocks injected
-     */
-    public Set<MockDescriptor> inject(Object systemUnderTest, InjectionPoint injectionPoint, MockDescriptor... mocks);
-
-
-
+	/**
+	 * Instantiates and injects mocks.
+	 * 
+	 * @param typeOfSystemUnderTest
+	 *            type of the system under test that is to be created
+	 * @param injectionPoint
+	 *            defines the injection point
+	 * @param mocks
+	 *            a list of mocked objected that will be used to populate
+	 *            injected fields, if no matching mock is found on this list it
+	 *            will be created using the mockEngine.
+	 * @return a set of mocks injected
+	 */
+	public <T> SutDescriptor<T> createAndInject(Class<T> typeOfSystemUnderTest,
+			InjectionPoint injectionPoint, MockDescriptor... mocks);
 }

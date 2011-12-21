@@ -2,6 +2,7 @@ package com.googlecode.mockarro;
 
 import static com.googlecode.mockarro.MethodSieve.methodsOf;
 import static com.googlecode.mockarro.injector.Injector.withMockEngine;
+import static java.lang.Thread.currentThread;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -14,30 +15,45 @@ import java.util.WeakHashMap;
 import com.googlecode.mockarro.injector.InjectionPoint;
 import com.googlecode.mockarro.injector.MockDescriptor;
 import com.googlecode.mockarro.injector.MockitoMockEngine;
+import com.googlecode.mockarro.injector.SutDescriptor;
 
 /**
- * Mockarro provides a way to define test's indirect input without a necessity to 
- * know the details of the the actual implementation of the unit under test. <br>
- * In other words, Mockarro makes it possible to test a method of a class that uses 
- * collaborators without any need to explicitly create collaborators' mock objects.
- * Instead it gives you a way to define the indirect input of the tested method.  
+ * Mockarro provides a way to define test's indirect input without a necessity
+ * to know the details of the the actual implementation of the unit under test. <br>
+ * In other words, Mockarro makes it possible to test a method of a class that
+ * uses collaborators without any need to explicitly create collaborators' mock
+ * objects. Instead it gives you a way to define the indirect input of the
+ * tested method.
  * <p>
- * The {@link #initSut(Object, MockDescriptor...)} method should be invoked
- * before every test method in order to initialize and reset the Mockarro
- * engine. The initSut method injects the object under test with mocked
- * dependencies. The mock dependencies can be either passed to the initSut
- * method in form of {@link MockDescriptor}s or they can be omitted. Every mock
- * that is omitted (and is required by the sut) will be created using the
- * default the {@link MockitoMockEngine}.
+ * The {@link #instanceForTesting(Class, MockDescriptor...)} or the
+ * {@link #instanceForTesting(Class, InjectionPoint, MockDescriptor...)} method
+ * should be invoked in order to create an instance of the unit under test. This
+ * is the only way to initialize a Mockarro test. During the instantiation
+ * Mockarro takes care of the injection and creation (if necessary) of the
+ * collaborators. Constructor injection, field injection and setter injection
+ * are supported (note that setter injection supports only single parameter
+ * methods whose name starts with the <i>set</i> prefix. The Guice style "any
+ * method injection" is not supported in this version. The
+ * {@link #instanceForTesting(Class, MockDescriptor...)} methods are capable of
+ * constructor injection given that at most one constructor is defined as
+ * eligible for injection. Otherwise an error will be reported. The mocked
+ * collaborators can be either passed to the instanceForTesting method in form
+ * of {@link MockDescriptor}s or they can be omitted. Every collaborator that
+ * does not have a mock object specified and passed to the instanceForTesting
+ * method (and is required by the sut) will be created using the default the
+ * {@link MockitoMockEngine}.
  * <p>
  * It is also possible to discover Mockito annotated mocks and to use them to
  * initialize Mockarro. Use following idiom in order to do so:<br>
  * <code>
- * {@code initSut(systemUnderTest, annotatedMocks(this))};
+ * {@code instanceForTesting(typeOfSystemUnderTest, annotatedMocks(this))};
  * </code><br>
  * Note that the {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
  * method is intended to be statically imported from
- * {@link MockitoMockDescriptionCreator} utility class.
+ * {@link MockitoMockDescriptionCreator} utility class. In order to use the
+ * idiom described above, the Mockito mocks have to be declared within the
+ * current test class and they have to be initialized using standard Mockito
+ * initialization procedure.
  * <p>
  * <p>
  * In order to define the indirect input to a tested method of type SomeClass to
@@ -49,7 +65,7 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
  * </code>
  * <p>
  * A synonym was defined for above declaration. It should be used when there is
- * a name class with other statically imported methods named <i>given</i>. The
+ * a name clash with other statically imported methods named <i>given</i>. The
  * outcome of both declarations is identical.
  * <p>
  * <code>
@@ -70,189 +86,207 @@ import com.googlecode.mockarro.injector.MockitoMockEngine;
  */
 public final class Mockarro<T> {
 
-    private static Map<Thread, Set<MockDescriptor>> mocksByThread = Collections
-                                                                          .synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
+	private static Map<Thread, Set<MockDescriptor>> mocksByThread = Collections
+			.synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
 
+	private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
+	private final Set<MockDescriptor> mocks;
 
-    private final List<Class<?>>                    genericTypes  = new ArrayList<Class<?>>();
-    private final Set<MockDescriptor>               mocks;
+	private final TypeLiteral<?> returnTypeLiteral;
 
-    private final TypeLiteral<?>                    returnTypeLiteral;
+	/**
+	 * Creates an instance of a unit under test, initialises Mockarro. This
+	 * method has to be used to instantiate the unit under test. This finds the
+	 * injection point among the most popular injection points (e.g. JEE6
+	 * &#064;Inject, Seam 2 &#064;In or Spring &#064;Autowired annotations). It
+	 * is also responsible for the injection of external (mocked) collaborators.
+	 * It is possible to pass the complete set of mocked collaborators to this
+	 * method or just a subset (or an empty set). In the latter case all
+	 * necessary collaborators will be mocked using the default
+	 * {@link MockitoMockEngine}.
+	 * <p>
+	 * This method has to be invoked before every single test execution -
+	 * preferably within a before method (a method annotated with &#064;Before
+	 * in JUnit 4.x or &#064;BeforeMethod in TestNG).
+	 * 
+	 * @param systemUnderTest
+	 *            the unit that is going to be tested.
+	 * @param injectionPoint
+	 *            the injection point.
+	 * @param mocks
+	 *            descriptors of the user managed mocks that are to be injected
+	 */
 
+	public static <T> T instanceForTesting(
+			final Class<T> typeOfSystemUnderTest, final MockDescriptor... mocks) {
+		final SutDescriptor<T> sutDescriptor = withMockEngine(
+				new MockitoMockEngine()).createInjector().instantiateAndInject(
+				typeOfSystemUnderTest, mocks);
 
-    /**
-     * Initialises Mockarro for given system under test. Its basic task is to
-     * reset the test by creating and injecting mocks into the system under
-     * test.
-     * <p>
-     * This method has to be invoked before every single test execution -
-     * preferably within a before method (a method annotated with @Before in
-     * JUnit 4.x or @BeforeMethod in TestNG).
-     * 
-     * @param systemUnderTest
-     *            the unit that is going to be tested.
-     * @param mocks
-     *            descriptors of the user managed mocks that are to be injected
-     */
-    public static void initSut(final Object systemUnderTest, final MockDescriptor... mocks) {
-        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine()).createInjector().andInject(
-                systemUnderTest, mocks);
-        mocksByThread.put(Thread.currentThread(), injections);
-    }
+		mocksByThread.put(currentThread(), sutDescriptor.getMocks());
+		return sutDescriptor.getSystemUnderTest();
+	}
 
+	/**
+	 * Creates an instance of a unit under test, initialises Mockarro and
+	 * specifies the injection point. This method has to be used to instantiate
+	 * the unit under test. It is also responsible for the injection of external
+	 * (mocked) collaborators. It is possible to pass the complete set of mocked
+	 * collaborators to this method or just a subset (or an empty set). In the
+	 * latter case all necessary collaborators will be mocked using the default
+	 * {@link MockitoMockEngine}.
+	 * <p>
+	 * This method has to be invoked before every single test execution -
+	 * preferably within a before method (a method annotated with &#064;Before
+	 * in JUnit 4.x or &#064;BeforeMethod in TestNG).
+	 * 
+	 * @param systemUnderTest
+	 *            the unit that is going to be tested.
+	 * @param injectionPoint
+	 *            the injection point.
+	 * @param mocks
+	 *            descriptors of the user managed mocks that are to be injected
+	 */
+	public static <T> T instanceForTesting(
+			final Class<T> typeOfSystemUnderTest,
+			final InjectionPoint injectionPoint, final MockDescriptor... mocks) {
+		final SutDescriptor<T> sutDescriptor = withMockEngine(
+				new MockitoMockEngine()).withInjectionPointAt(injectionPoint)
+				.createInjector()
+				.instantiateAndInject(typeOfSystemUnderTest, mocks);
 
+		mocksByThread.put(currentThread(), sutDescriptor.getMocks());
+		return sutDescriptor.getSystemUnderTest();
+	}
 
-    /**
-     * Initialises Mockarro for given system under test and specifies the
-     * injection point. Its basic task is to reset the test by creating and
-     * injecting mocks into the system under test.
-     * <p>
-     * This method has to be invoked before every single test execution -
-     * preferably within a before method (a method annotated with @Before in
-     * JUnit 4.x or @BeforeMethod in TestNG).
-     * 
-     * @param systemUnderTest
-     *            the unit that is going to be tested.
-     * @param injectionPoint
-     *            the injection point.
-     * @param mocks
-     *            descriptors of the user managed mocks that are to be injected
-     */
-    public static void initSut(final Object systemUnderTest, final InjectionPoint injectionPoint,
-            final MockDescriptor... mocks) {
-        final Set<MockDescriptor> injections = withMockEngine(new MockitoMockEngine())
-                .withInjectionPointAt(injectionPoint).createInjector().andInject(systemUnderTest, mocks);
-        mocksByThread.put(Thread.currentThread(), injections);
-    }
+	/**
+	 * Registers behaviour for all of the methods that return an object of the
+	 * specified type.
+	 * <p>
+	 * Throws an {@link IllegalStateException} if the object under test has not
+	 * been created using the
+	 * {@link #instanceForTesting(Class, MockDescriptor...)} or the
+	 * {@link #instanceForTesting(Class, InjectionPoint, MockDescriptor...)}
+	 * method.
+	 * 
+	 * @param <T>
+	 *            will be automatically inferred.
+	 * @param typeOfRequestedValue
+	 *            The type literal i.e. class or primitive literal. For example
+	 *            if the requested type is of MyClass type the
+	 *            typeOfRequestedValue will be MyClass.class, if the requested
+	 *            object is of a primitive integer type use int.class, etc.
+	 * @return a Mockarro object that can be used for ongoing stubbing.
+	 */
+	public static <T> Mockarro<T> given(
+			final TypeLiteral<T> typeOfRequestedValue) {
+		final Set<MockDescriptor> mockDescription = mocksByThread.get(Thread
+				.currentThread());
+		if (mockDescription == null) {
+			throw new IllegalStateException(
+					"The mockarro test has not been initialized yet.\nAre you sure the system under has been created using the instanceForTesting method?");
+		}
+		return new Mockarro<T>(mockDescription, typeOfRequestedValue);
+	}
 
+	/**
+	 * A version of {@link #given(TypeLiteral)} that should be used for
+	 * non-generic return types.
+	 * 
+	 * @param typeOfRequestedValue
+	 *            non-generic class literal
+	 * @return ongoing mockarro stubbing
+	 */
+	public static <T> Mockarro<T> given(final Class<T> typeOfRequestedValue) {
+		return given(TypeLiteral.create(typeOfRequestedValue));
+	}
 
+	/**
+	 * A synonym for {@link #given(Class)}. Should replace <i>given</i> every
+	 * time there is a name conflict with another <i>given</i> method imported
+	 * statically. The main intention was to avoid a name clash with
+	 * BDDMockito's <i>given</i> method.
+	 * 
+	 * @param <T>
+	 *            will be automatically inferred.
+	 * @param typeOfRequestedValue
+	 *            The type literal i.e. class or primitive literal. For example
+	 *            if the requested type is of MyClass type the
+	 *            typeOfRequestedValue will be MyClass.class, if the requested
+	 *            object is of a primitive integer type use int.class, etc.
+	 * @return
+	 */
+	public static <T> Mockarro<T> givenObjectOf(
+			final TypeLiteral<T> typeOfRequestedValue) {
+		return given(typeOfRequestedValue);
+	}
 
-    /**
-     * Registers behaviour for all of the methods that return an object of the
-     * specified type.
-     * <p>
-     * Throws an {@link IllegalStateException} if the {@link #initSut(Object)}
-     * method has not been invoked for the current system under test before
-     * invoking this method.
-     * 
-     * @param <T>
-     *            will be automatically inferred.
-     * @param typeOfRequestedValue
-     *            The type literal i.e. class or primitive literal. For example
-     *            if the requested type is of MyClass type the
-     *            typeOfRequestedValue will be MyClass.class, if the requested
-     *            object is of a primitive integer type use int.class, etc.
-     * @return a Mockarro object that can be used for ongoing stubbing.
-     */
-    public static <T> Mockarro<T> given(final TypeLiteral<T> typeOfRequestedValue) {
-        final Set<MockDescriptor> mockDescription = mocksByThread.get(Thread.currentThread());
-        if (mockDescription == null) {
-            throw new IllegalStateException(
-                    "The mockarro test has not been initialized yet.\nAre you sure you have called the init method with the current unit under test as the parameter?");
-        }
-        return new Mockarro<T>(mockDescription, typeOfRequestedValue);
-    }
+	/**
+	 * A version of {@link #givenObjectOf(TypeLiteral)} that should be used for
+	 * non-generic return types.
+	 * 
+	 * @param typeOfRequestedValue
+	 * @return
+	 */
+	public static <T> Mockarro<T> givenObjectOf(
+			final Class<T> typeOfRequestedValue) {
+		return given(typeOfRequestedValue);
+	}
 
+	/**
+	 * Prepares the stubbing to be recorded.
+	 * 
+	 * @return a new Stubbing
+	 */
+	public Stubbing<T> isRequested() {
+		return new Stubbing<T>(mocks, genericTypes, returnTypeLiteral);
+	}
 
-    /**
-     * A version of {@link #given(TypeLiteral)} that should be used for
-     * non-generic return types.
-     * 
-     * @param typeOfRequestedValue
-     *            non-generic class literal
-     * @return ongoing mockarro stubbing
-     */
-    public static <T> Mockarro<T> given(final Class<T> typeOfRequestedValue) {
-        return given(TypeLiteral.create(typeOfRequestedValue));
-    }
+	private Mockarro(final Set<MockDescriptor> mocks,
+			final TypeLiteral<?> returnTypeLiteral) {
+		super();
+		this.mocks = mocks;
+		this.returnTypeLiteral = returnTypeLiteral;
+	}
 
+	public static class Stubbing<T> {
 
-    /**
-     * A synonym for {@link #given(Class)}. Should replace <i>given</i> every
-     * time there is a name conflict with another <i>given</i> method imported
-     * statically. The main intention was to avoid a name clash with
-     * BDDMockito's <i>given</i> method.
-     * 
-     * @param <T>
-     *            will be automatically inferred.
-     * @param typeOfRequestedValue
-     *            The type literal i.e. class or primitive literal. For example
-     *            if the requested type is of MyClass type the
-     *            typeOfRequestedValue will be MyClass.class, if the requested
-     *            object is of a primitive integer type use int.class, etc.
-     * @return
-     */
-    public static <T> Mockarro<T> givenObjectOf(final TypeLiteral<T> typeOfRequestedValue) {
-        return given(typeOfRequestedValue);
-    }
+		private final Set<MockDescriptor> mocks;
 
+		private final TypeLiteral<?> returnTypeLiteral;
+		private final MockitoMockRecorder recorder = new MockitoMockRecorder();
 
-    /**
-     * A version of {@link #givenObjectOf(TypeLiteral)} that should be used for
-     * non-generic return types.
-     * 
-     * @param typeOfRequestedValue
-     * @return
-     */
-    public static <T> Mockarro<T> givenObjectOf(final Class<T> typeOfRequestedValue) {
-        return given(typeOfRequestedValue);
-    }
+		private Stubbing(final Set<MockDescriptor> mocks,
+				final List<Class<?>> genericTypes,
+				final TypeLiteral<?> returnTypeLiteral) {
+			super();
+			this.mocks = mocks;
+			this.returnTypeLiteral = returnTypeLiteral;
+		}
 
+		/**
+		 * Defines the value that will be returned when object of defined type
+		 * is requested.
+		 * 
+		 * @param recordedValue
+		 *            the vale that will be returned by the mocked object when
+		 *            the mock object is requested to return the value of
+		 *            previously defined type.
+		 */
+		public void thenReturn(final T recordedValue) {
 
-    /**
-     * Prepares the stubbing to be recorded.
-     * 
-     * @return a new Stubbing
-     */
-    public Stubbing<T> isRequested() {
-        return new Stubbing<T>(mocks, genericTypes, returnTypeLiteral);
-    }
+			for (final MockDescriptor descriptor : mocks) {
 
-
-
-    private Mockarro(final Set<MockDescriptor> mocks, final TypeLiteral<?> returnTypeLiteral) {
-        super();
-        this.mocks = mocks;
-        this.returnTypeLiteral = returnTypeLiteral;
-    }
-
-
-    public static class Stubbing<T> {
-
-        private final Set<MockDescriptor> mocks;
-
-        private final TypeLiteral<?>      returnTypeLiteral;
-        private final MockitoMockRecorder recorder = new MockitoMockRecorder();
-
-
-        private Stubbing(final Set<MockDescriptor> mocks, final List<Class<?>> genericTypes,
-                final TypeLiteral<?> returnTypeLiteral) {
-            super();
-            this.mocks = mocks;
-            this.returnTypeLiteral = returnTypeLiteral;
-        }
-
-
-        /**
-         * Defines the value that will be returned when object of defined type
-         * is requested.
-         * 
-         * @param recordedValue
-         *            the vale that will be returned by the mocked object when
-         *            the mock object is requested to return the value of
-         *            previously defined type.
-         */
-        public void thenReturn(final T recordedValue) {
-
-            for (final MockDescriptor descriptor : mocks) {
-
-                for (final Method method : methodsOf((Class<?>) descriptor.getType()).thatReturn(returnTypeLiteral)
-                        .asSet()) {
-                    if (!method.getName().equals("hashCode") && !method.getName().equals("equals")) {
-                        recorder.record(descriptor.getMock(), method, recordedValue);
-                    }
-                }
-            }
-        }
-    }
+				for (final Method method : methodsOf(
+						(Class<?>) descriptor.getType()).thatReturn(
+						returnTypeLiteral).asSet()) {
+					if (!method.getName().equals("hashCode")
+							&& !method.getName().equals("equals")) {
+						recorder.record(descriptor.getMock(), method,
+								recordedValue);
+					}
+				}
+			}
+		}
+	}
 }

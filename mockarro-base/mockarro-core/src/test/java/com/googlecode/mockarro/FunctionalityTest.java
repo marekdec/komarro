@@ -2,57 +2,51 @@ package com.googlecode.mockarro;
 
 import static com.googlecode.mockarro.Mockarro.given;
 import static com.googlecode.mockarro.Mockarro.givenObjectOf;
-import static com.googlecode.mockarro.Mockarro.initSut;
+import static com.googlecode.mockarro.Mockarro.instanceForTesting;
 import static java.util.Arrays.asList;
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.util.List;
 
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.googlecode.mockarro.testclasses.SystemUnderTest;
 
 public class FunctionalityTest {
 
-    private SystemUnderTest sut;
+	private SystemUnderTest sut;
 
+	@BeforeTest
+	public void init() {
+		sut = instanceForTesting(SystemUnderTest.class);
+	}
 
-    @BeforeMethod
-    public void init() {
-        sut = new SystemUnderTest();
-    }
+	@Test
+	public void testMockingFunctionality() {
+		given(int.class).isRequested().thenReturn(4);
 
+		final int result = sut.squarePlusOne(12);
 
-    @Test
-    public void testMockingFunctionality() {
-        initSut(sut);
-        given(int.class).isRequested().thenReturn(4);
+		assertThat(result).isEqualTo(5);
+	}
 
-        final int result = sut.squarePlusOne(12);
+	@Test
+	public void testMockingFunctionalityUsingSynonym() {
+		givenObjectOf(int.class).isRequested().thenReturn(16);
 
-        assertThat(result).isEqualTo(5);
-    }
+		final int result = sut.squarePlusOne(4);
 
+		assertThat(result).isEqualTo(17);
+	}
 
-    @Test
-    public void testMockingFunctionalityUsingSynonym() {
-        initSut(sut);
-        givenObjectOf(int.class).isRequested().thenReturn(16);
+	@Test
+	public void testGenericReturnTypeSelection() {
+		givenObjectOf(new TypeLiteral<List<Integer>>() {
+		}).isRequested().thenReturn(asList(2, 4, 8, 16, 32));
 
-        final int result = sut.squarePlusOne(4);
+		final List<Integer> result = sut.getFivePowersOf(2);
 
-        assertThat(result).isEqualTo(17);
-    }
-
-
-    @Test
-    public void testGenericReturnTypeSelection() {
-        initSut(sut);
-        givenObjectOf(new TypeLiteral<List<Integer>>() {}).isRequested().thenReturn(asList(2, 4, 8, 16, 32));
-
-        final List<Integer> result = sut.getFivePowersOf(2);
-
-        assertThat(result).containsSequence(2, 4, 8, 16, 32);
-    }
+		assertThat(result).containsSequence(2, 4, 8, 16, 32);
+	}
 }

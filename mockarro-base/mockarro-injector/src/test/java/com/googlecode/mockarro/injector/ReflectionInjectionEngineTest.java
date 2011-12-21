@@ -14,35 +14,40 @@ import com.googlecode.mockarro.test.SystemUnderTest;
 
 public class ReflectionInjectionEngineTest {
 
-    @Mock
-    private MockEngine                mockedMockEngine;
+	@Mock
+	private MockEngine mockedMockEngine;
 
-    private ReflectionInjectionEngine engine;
+	private ReflectionInjectionEngine engine;
 
+	@BeforeMethod
+	public void init() {
+		initMocks(this);
+	}
 
-    @BeforeMethod
-    public void init() {
-        initMocks(this);
-    }
+	@Test
+	public void injectNotAccessibleObjects() {
+		// given
+		when(mockedMockEngine.createMock(Object.class))
+				.thenReturn(new Object()).thenReturn(new Object())
+				.thenReturn(new Object());
+		engine = new ReflectionInjectionEngine(mockedMockEngine);
 
+		// when
+		SutDescriptor<SystemUnderTest> sutDescriptor = engine.createAndInject(
+				SystemUnderTest.class,
+				new AnnotatedInjectionPoint(Inject.class));
 
-    @Test
-    public void injectNotAccessibleObjects() {
-        // prepare
-        when(mockedMockEngine.createMock(Object.class)).thenReturn(new Object()).thenReturn(new Object())
-                .thenReturn(new Object());
-        engine = new ReflectionInjectionEngine(mockedMockEngine);
+		// then
+		assertThat(sutDescriptor).isNotNull();
+		assertThat(sutDescriptor.getSystemUnderTest()).isNotNull();
 
-        final SystemUnderTest sut = new SystemUnderTest();
+		SystemUnderTest sut = sutDescriptor.getSystemUnderTest();
 
-        // invoke
-        engine.inject(sut, new AnnotatedInjectionPoint(Inject.class));
+		assertThat(sut.getFieldInjectionPoint()).isNotNull().isInstanceOf(
+				Object.class);
+		assertThat(sut.getNotMeantForInjection()).isNull();
 
-        // verify
-        assertThat(sut.getFieldInjectionPoint()).isNotNull().isInstanceOf(Object.class);
-        assertThat(sut.getNotMeantForInjection()).isNull();
-
-        assertThat(sut.getUsedBySetterInjector()).isNotNull();
-        assertThat(sut.getUsedByPrivateSetterInjector()).isNotNull();
-    }
+		assertThat(sut.getUsedBySetterInjector()).isNotNull();
+		assertThat(sut.getUsedByPrivateSetterInjector()).isNotNull();
+	}
 }

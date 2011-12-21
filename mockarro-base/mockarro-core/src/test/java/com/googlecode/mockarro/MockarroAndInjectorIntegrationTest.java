@@ -1,6 +1,6 @@
 package com.googlecode.mockarro;
 
-import static com.googlecode.mockarro.Mockarro.initSut;
+import static com.googlecode.mockarro.Mockarro.instanceForTesting;
 import static com.googlecode.mockarro.MockitoMockDescriptionCreator.annotatedMocks;
 import static com.googlecode.mockarro.injector.MockDescriptor.mockedObject;
 import static org.fest.assertions.Assertions.assertThat;
@@ -14,29 +14,32 @@ import com.googlecode.mockarro.testclasses.SystemUnderTest;
 
 public class MockarroAndInjectorIntegrationTest {
 
-    @Mock
-    private MultiplierService multService;
+	@Mock
+	private MultiplierService multService;
 
+	@Test
+	public void verifyInitSutWithMocksInjectsGivenMocks() {
+		// given
+		final MultiplierService multiplierService = new MultiplierService();
 
-    @Test
-    public void verifyInitSutWithMocksInjectsGivenMocks() {
+		// when
+		SystemUnderTest sut = instanceForTesting(SystemUnderTest.class,
+				mockedObject(multiplierService).ofType(MultiplierService.class));
 
-        final MultiplierService multiplierService = new MultiplierService();
+		// then
+		assertThat(sut.getService()).isSameAs(multiplierService);
+	}
 
-        final SystemUnderTest sut = new SystemUnderTest();
-        initSut(sut, mockedObject(multiplierService).ofType(MultiplierService.class));
+	@Test
+	public void verifyInitSutWithMocksInjectsDiscoveredMocks() {
+		// given
+		initMocks(this);
 
-        assertThat(sut.getService()).isSameAs(multiplierService);
-    }
+		// when
+		SystemUnderTest sut = instanceForTesting(SystemUnderTest.class,
+				annotatedMocks(this));
 
-
-    @Test
-    public void verifyInitSutWithMocksInjectsDiscoveredMocks() {
-        initMocks(this);
-
-        final SystemUnderTest sut = new SystemUnderTest();
-        initSut(sut, annotatedMocks(this));
-
-        assertThat(sut.getService()).isSameAs(multService);
-    }
+		// then
+		assertThat(sut.getService()).isSameAs(multService);
+	}
 }
