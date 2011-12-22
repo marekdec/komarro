@@ -6,11 +6,11 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.googlecode.mockarro.testclasses.ClassWithFieldAndSetterInjector;
+import com.googlecode.mockarro.testclasses.ClassWithFieldAndSetterInjectionElements;
 
 public class AnnotatedInjectionPointTest {
 
-	private final Class<ClassWithFieldAndSetterInjector> dummy = ClassWithFieldAndSetterInjector.class;
+	private final Class<ClassWithFieldAndSetterInjectionElements> dummy = ClassWithFieldAndSetterInjectionElements.class;
 
 	@Test
 	public void verifyElementsAreProperlyQualified() throws SecurityException,

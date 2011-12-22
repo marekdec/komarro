@@ -9,6 +9,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -17,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An {@link InjectionEngine} that uses reflection to inject smocks.
+ * An injecting mechanism that uses reflection to inject mocks.
  * 
  * @author marekdec
  */
@@ -132,6 +133,30 @@ final class InjectionEngine {
 				+ typeOfSystemUnderTest + "] could not be initialized.");
 	}
 
+	private List<Field> getDeclaredAndSuperclassHierarchyFields(Class<?> type) {
+		List<Field> fields = new ArrayList<Field>(
+				asList(type.getDeclaredFields()));
+
+		if (type.getSuperclass() != null) {
+			fields.addAll(getDeclaredAndSuperclassHierarchyFields(type
+					.getSuperclass()));
+		}
+
+		return fields;
+	}
+
+	private List<Method> getDeclaredAndSuperclassHierarchyMethods(Class<?> type) {
+		List<Method> methods = new ArrayList<Method>(
+				asList(type.getDeclaredMethods()));
+
+		if (type.getSuperclass() != null) {
+			methods.addAll(getDeclaredAndSuperclassHierarchyMethods(type
+					.getSuperclass()));
+		}
+
+		return methods;
+	}
+
 	/**
 	 * Creates and injects mocks into the injection points of given system under
 	 * test. Support fields injection and setter injection (for both private and
@@ -145,7 +170,9 @@ final class InjectionEngine {
 			final Set<MockDescriptor> createdMocks,
 			final MockRepository mockRepository) {
 
-		injectElements(asList(systemUnderTest.getClass().getDeclaredFields()),
+		injectElements(
+				getDeclaredAndSuperclassHierarchyFields(systemUnderTest
+						.getClass()),
 				systemUnderTest, injectionPoint,
 				new InjectElementFunction<Field>() {
 
@@ -165,7 +192,9 @@ final class InjectionEngine {
 					}
 				});
 
-		injectElements(asList(systemUnderTest.getClass().getDeclaredMethods()),
+		injectElements(
+				getDeclaredAndSuperclassHierarchyMethods(systemUnderTest
+						.getClass()),
 				systemUnderTest, injectionPoint,
 				new InjectElementFunction<Method>() {
 
