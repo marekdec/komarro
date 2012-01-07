@@ -65,7 +65,6 @@
 
 	<modules>
 		<module>mockarro-core</module>
-		<module>mockarro-injector</module>
 	</modules>
 
 	<build>
@@ -94,6 +93,11 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>3.0-beta-3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
