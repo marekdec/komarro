@@ -3,6 +3,7 @@ package com.googlecode.mockarro;
 import static java.util.Arrays.asList;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 
 final class Injector {
@@ -57,10 +58,11 @@ final class Injector {
 		 * Seam 2 @In or Spring @Autowired annotations.
 		 */
 		final List<String> popularInjectionAnnotations = asList(
-				"javax.inject.Inject", "org.jboss.seam.annotations.In",
+				"org.jboss.seam.annotations.In",
 				"org.jboss.seam.annotations.Out",
 				"org.springframework.beans.factory.annotation.Autowired",
-				"javax.annotation.Resource");
+				"javax.annotation.Resource", "com.google.inject.Inject",
+				"javax.inject.Inject");
 
 		private InjectionEngine injectionEngine;
 		private final MockEngine mockEngine;
@@ -123,13 +125,7 @@ final class Injector {
 		 */
 		public Injector createInjector() {
 			if (injectionPoint == null) {
-				injectionPoint = guessInjectionPoint();
-				if (injectionPoint == null) {
-					throw new IllegalStateException(
-							"No injection point has been specified and it cannot be guessed as no popular injection annotation is present on the classpath. "
-									+ popularInjectionAnnotations
-									+ " were tried to be found.");
-				}
+				injectionPoint = guessAnnotatedInjectionPoint();
 			}
 			if (injectionEngine == null) {
 				injectionEngine = new InjectionEngine(mockEngine);
@@ -138,7 +134,9 @@ final class Injector {
 			return new Injector(injectionEngine, injectionPoint);
 		}
 
-		private InjectionPoint guessInjectionPoint() {
+		private InjectionPoint guessAnnotatedInjectionPoint() {
+			List<Class<? extends Annotation>> injectionAnnotationsInClasspath = new ArrayList<Class<? extends Annotation>>();
+
 			for (final String injectionAnnotationName : popularInjectionAnnotations) {
 				try {
 					// If the cast fails current annotation will be ignored due
@@ -148,7 +146,9 @@ final class Injector {
 					final Class<? extends Annotation> annotation = (Class<? extends Annotation>) Class
 							.forName(injectionAnnotationName);
 
-					return new AnnotatedInjectionPoint(annotation);
+					// the execution flow will get to this point only if the
+					// annotation is present in the classpath
+					injectionAnnotationsInClasspath.add(annotation);
 				} catch (final ClassNotFoundException e) {
 					// Do nothing as this is completely normal that the
 					// annotation is not present on the classpath
@@ -159,7 +159,16 @@ final class Injector {
 				}
 			}
 
-			return null;
+			if (injectionAnnotationsInClasspath.isEmpty()) {
+				throw new IllegalStateException(
+						"No injection point cannot be determined as no popular injection "
+								+ "annotations has been found on the classpath. "
+								+ popularInjectionAnnotations
+								+ " were tried to be found. In case you do not use any of the listed above"
+								+ " popular injection annotations, you can implement your own InjectionPoint.");
+			}
+
+			return new AnnotatedInjectionPoint(injectionAnnotationsInClasspath);
 		}
 	}
 }

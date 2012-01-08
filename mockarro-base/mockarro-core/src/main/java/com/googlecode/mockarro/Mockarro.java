@@ -42,7 +42,7 @@ import java.util.WeakHashMap;
  * It is also possible to discover Mockito annotated mocks and to use them to
  * initialize Mockarro. Use following idiom in order to do so:<br>
  * <code>
- * {@code instanceForTesting(tkiedy do ypeOfSystemUnderTest, annotatedMocks(this))};
+ * {@code instanceForTesting(typeOfSystemUnderTest, annotatedMocks(this))};
  * </code><br>
  * Note that the {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
  * method is intended to be statically imported from
