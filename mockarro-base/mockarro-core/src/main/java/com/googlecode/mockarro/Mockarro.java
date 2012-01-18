@@ -51,6 +51,10 @@ import java.util.WeakHashMap;
  * current test class and they have to be initialized using standard Mockito
  * initialization procedure.
  * <p>
+ * It is possible to mix the Mockito mocks behavior recording and verification
+ * with the Mockarro style mock behavior definition. The last thing declared
+ * will override all previous declarations.
+ * <p>
  * <p>
  * In order to define the indirect input to a tested method of type SomeClass to
  * be equal to someObject use a static import statement to import the
@@ -80,15 +84,10 @@ import java.util.WeakHashMap;
  * 
  * @author Marek Dec
  */
-public final class Mockarro<T> {
+public final class Mockarro {
 
 	private static Map<Thread, Set<MockDescriptor>> mocksByThread = Collections
 			.synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
-
-	private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
-	private final Set<MockDescriptor> mocks;
-
-	private final TypeLiteral<?> returnTypeLiteral;
 
 	/**
 	 * Creates an instance of a unit under test, initialises Mockarro. This
@@ -173,7 +172,7 @@ public final class Mockarro<T> {
 	 *            object is of a primitive integer type use int.class, etc.
 	 * @return a Mockarro object that can be used for ongoing stubbing.
 	 */
-	public static <T> Mockarro<T> given(
+	public static <T> Assumption<T> given(
 			final TypeLiteral<T> typeOfRequestedValue) {
 		final Set<MockDescriptor> mockDescription = mocksByThread.get(Thread
 				.currentThread());
@@ -181,7 +180,7 @@ public final class Mockarro<T> {
 			throw new IllegalStateException(
 					"The Mockarro test has not been initialized yet.\nAre you sure the system under has been created using the instanceForTesting method?");
 		}
-		return new Mockarro<T>(mockDescription, typeOfRequestedValue);
+		return new Assumption<T>(mockDescription, typeOfRequestedValue);
 	}
 
 	/**
@@ -192,7 +191,7 @@ public final class Mockarro<T> {
 	 *            non-generic class literal
 	 * @return ongoing Mockarro stubbing
 	 */
-	public static <T> Mockarro<T> given(final Class<T> typeOfRequestedValue) {
+	public static <T> Assumption<T> given(final Class<T> typeOfRequestedValue) {
 		return given(TypeLiteral.create(typeOfRequestedValue));
 	}
 
@@ -209,9 +208,9 @@ public final class Mockarro<T> {
 	 *            if the requested type is of MyClass type the
 	 *            typeOfRequestedValue will be MyClass.class, if the requested
 	 *            object is of a primitive integer type use int.class, etc.
-	 * @return
+	 * @return a new {@link Assumption}
 	 */
-	public static <T> Mockarro<T> givenObjectOf(
+	public static <T> Assumption<T> givenObjectOf(
 			final TypeLiteral<T> typeOfRequestedValue) {
 		return given(typeOfRequestedValue);
 	}
@@ -221,27 +220,35 @@ public final class Mockarro<T> {
 	 * non-generic return types.
 	 * 
 	 * @param typeOfRequestedValue
-	 * @return
+	 * @return a new {@link Assumption}
 	 */
-	public static <T> Mockarro<T> givenObjectOf(
+	public static <T> Assumption<T> givenObjectOf(
 			final Class<T> typeOfRequestedValue) {
 		return given(typeOfRequestedValue);
 	}
 
-	/**
-	 * Prepares the stubbing to be recorded.
-	 * 
-	 * @return a new Stubbing
-	 */
-	public Stubbing<T> isRequested() {
-		return new Stubbing<T>(mocks, genericTypes, returnTypeLiteral);
-	}
+	public static class Assumption<T> {
 
-	private Mockarro(final Set<MockDescriptor> mocks,
-			final TypeLiteral<?> returnTypeLiteral) {
-		super();
-		this.mocks = mocks;
-		this.returnTypeLiteral = returnTypeLiteral;
+		private final List<Class<?>> genericTypes = new ArrayList<Class<?>>();
+
+		private final Set<MockDescriptor> mocks;
+		private final TypeLiteral<?> returnTypeLiteral;
+
+		public Assumption(Set<MockDescriptor> mocks,
+				TypeLiteral<?> returnTypeLiteral) {
+			super();
+			this.mocks = mocks;
+			this.returnTypeLiteral = returnTypeLiteral;
+		}
+
+		/**
+		 * Prepares the stubbing to be recorded.
+		 * 
+		 * @return a new Stubbing
+		 */
+		public Stubbing<T> isRequested() {
+			return new Stubbing<T>(mocks, genericTypes, returnTypeLiteral);
+		}
 	}
 
 	public static class Stubbing<T> {

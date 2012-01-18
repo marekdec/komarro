@@ -6,7 +6,7 @@
 		<artifactId>mockarro-base</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>mockarro-core</artifactId>
+	<artifactId>mockarro</artifactId>
 	<name>mockarro-core</name>
 	<description>A utility that provides a way to define indirect input to a method under test.</description>
 
@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>org.easytesting</groupId>
 			<artifactId>fest-assert</artifactId>
-			<version>1.3</version>
+			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
