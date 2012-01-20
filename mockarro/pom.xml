@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.googlecode.mockarro</groupId>
 		<artifactId>mockarro-base</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>mockarro</artifactId>
 	<name>mockarro</name>
