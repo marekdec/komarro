@@ -24,9 +24,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<connection>scm:svn:http://mockarro.googlecode.com/svn/trunk/</connection>
-		<developerConnection>scm:svn:https://mockarro.googlecode.com/svn/trunk/</developerConnection>
-		<url>http://mockarro.googlecode.com/svn/trunk/</url>
+		<connection>scm:git:https://marekdec@code.google.com/p/komarro/</connection>
+		<developerConnection>scm.git:https://marekdec@code.google.com/p/komarro/</developerConnection>
+		<url>http://code.google.com/p/komarro/source/checkout</url>
 	</scm>
 	<url>http://komarro.googlecode.com/</url>
 
