@@ -7,11 +7,10 @@
 	</parent>
 
 	<groupId>com.googlecode.mockarro</groupId>
-	<artifactId>mockarro-base</artifactId>
-	<version>1.1-SNAPSHOT</version>
-	<packaging>pom</packaging>
-	<name>mockarro-base</name>
-	<description>The parent maven artifact of the Mockarro utility</description>
+	<artifactId>mockarro</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>mockarro</name>
+	<description>A java test utility based on Mockito mocking capabilities that provides a way to define indirect inputs of a test</description>
 
 	<issueManagement>
 		<system>google</system>
@@ -61,10 +60,40 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<dependencies>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>1.9.0</version>
+		</dependency>
 
-	<modules>
-		<module>mockarro</module>
-	</modules>
+		<!-- Testing dependencies -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.0.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
+			<version>1.4</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 
 	<build>
 		<extensions>
