@@ -51,7 +51,7 @@ final class Injector {
 	 * 
 	 * @author marekdec
 	 */
-	public final static class InjectorBuilder {
+	final static class InjectorBuilder {
 
 		/**
 		 * Defines a list of popular injection annotations e.g. JEE6 @Inject,

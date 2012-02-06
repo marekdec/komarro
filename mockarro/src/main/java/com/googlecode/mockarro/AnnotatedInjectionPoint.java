@@ -12,7 +12,7 @@ import java.util.Set;
  * 
  * @author marekdec
  */
-public final class AnnotatedInjectionPoint implements InjectionPoint {
+final class AnnotatedInjectionPoint implements InjectionPoint {
 	private final Set<Class<? extends Annotation>> annotations;
 
 	/**

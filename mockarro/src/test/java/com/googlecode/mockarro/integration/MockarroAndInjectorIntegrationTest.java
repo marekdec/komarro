@@ -42,9 +42,4 @@ public class MockarroAndInjectorIntegrationTest {
 		// then
 		assertThat(sut.getService()).isSameAs(multService);
 	}
-
-	@Test
-	public void testConstructorInjection() {
-
-	}
 }

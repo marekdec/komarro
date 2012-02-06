@@ -123,45 +123,12 @@ public final class Mockarro {
 	}
 
 	/**
-	 * Creates an instance of a unit under test, initialises Mockarro and
-	 * specifies the injection point. This method has to be used to instantiate
-	 * the unit under test. It is also responsible for the injection of external
-	 * (mocked) collaborators. It is possible to pass the complete set of mocked
-	 * collaborators to this method or just a subset (or an empty set). In the
-	 * latter case all necessary collaborators will be mocked using the default
-	 * mockito mock engine.
-	 * <p>
-	 * This method has to be invoked before every single test execution -
-	 * preferably within a before method (a method annotated with &#064;Before
-	 * in JUnit 4.x or &#064;BeforeMethod in TestNG).
-	 * 
-	 * @param systemUnderTest
-	 *            the unit that is going to be tested.
-	 * @param injectionPoint
-	 *            the injection point.
-	 * @param mocks
-	 *            descriptors of the user managed mocks that are to be injected
-	 */
-	public static <T> T instanceForTesting(
-			final Class<T> typeOfSystemUnderTest,
-			final InjectionPoint injectionPoint, final MockDescriptor... mocks) {
-		final SutDescriptor<T> sutDescriptor = withMockEngine(new MockEngine())
-				.withInjectionPointAt(injectionPoint).createInjector()
-				.instantiateAndInject(typeOfSystemUnderTest, mocks);
-
-		mocksByThread.put(currentThread(), sutDescriptor.getMocks());
-		return sutDescriptor.getSystemUnderTest();
-	}
-
-	/**
 	 * Registers behaviour for all of the methods that return an object of the
 	 * specified type.
 	 * <p>
 	 * Throws an {@link IllegalStateException} if the object under test has not
 	 * been created using the
-	 * {@link #instanceForTesting(Class, MockDescriptor...)} or the
-	 * {@link #instanceForTesting(Class, InjectionPoint, MockDescriptor...)}
-	 * method.
+	 * {@link #instanceForTesting(Class, MockDescriptor...)} method.
 	 * 
 	 * @param <T>
 	 *            will be automatically inferred.
