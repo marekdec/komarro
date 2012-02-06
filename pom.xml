@@ -6,10 +6,10 @@
 		<version>7</version>
 	</parent>
 
-	<groupId>com.googlecode.mockarro</groupId>
-	<artifactId>mockarro</artifactId>
+	<groupId>com.googlecode.komarro</groupId>
+	<artifactId>komarro</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>mockarro</name>
+	<name>komarro</name>
 	<description>A java test utility based on Mockito mocking capabilities that provides a way to define indirect inputs of a test</description>
 
 	<issueManagement>
@@ -28,7 +28,7 @@
 		<developerConnection>scm:svn:https://mockarro.googlecode.com/svn/trunk/</developerConnection>
 		<url>http://mockarro.googlecode.com/svn/trunk/</url>
 	</scm>
-	<url>http://mockarro.googlecode.com/</url>
+	<url>http://komarro.googlecode.com/</url>
 
 	<developers>
 		<developer>
