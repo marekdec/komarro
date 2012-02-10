@@ -8,7 +8,7 @@
 
 	<groupId>com.googlecode.komarro</groupId>
 	<artifactId>komarro</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>komarro</name>
 	<description>A java test utility based on Mockito mocking capabilities that provides a way to define indirect inputs of a test</description>
 
