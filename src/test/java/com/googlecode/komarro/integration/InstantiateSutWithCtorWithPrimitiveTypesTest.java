@@ -5,6 +5,7 @@ import static com.googlecode.komarro.MockDescriptor.mockedObject;
 
 import org.testng.annotations.Test;
 
+import com.googlecode.komarro.testclasses.SUTWithAllPrimitveTypesToInject;
 import com.googlecode.komarro.testclasses.SUTWithCollaboratorThatCannotBeMocked;
 import com.googlecode.komarro.testclasses.SUTWithCtorWithPrimitveTypes;
 
@@ -34,5 +35,11 @@ public class InstantiateSutWithCtorWithPrimitiveTypesTest {
 		instanceForTesting(SUTWithCollaboratorThatCannotBeMocked.class);
 
 		// then expect an exception
+	}
+
+	@Test
+	public void verifyCorrectDefaultValuesAreGivenToInjectedPrimitiveTypes() {
+		instanceForTesting(SUTWithAllPrimitveTypesToInject.class);
+
 	}
 }
