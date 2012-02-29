@@ -53,7 +53,8 @@ public final class MockitoMockDescriptionCreator {
 					throw new IllegalStateException(
 							"Critical error, cannot create mock descriptors as the field "
 									+ field.getName()
-									+ " annotated with @Mock annotation is not accesible.");
+									+ " annotated with @Mock annotation is not accesible.",
+							e);
 				}
 			}
 		}
