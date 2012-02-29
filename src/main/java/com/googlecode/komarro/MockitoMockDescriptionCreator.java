@@ -10,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * The main objective of this utility class is to provide methods that
+ * The objective of this utility class is to provide methods that
  * facilitate the MockDescriptors creation in the Mockito annotation based
- * tests.
+ * tests.<p>
  * 
  * @author marekdec
  */

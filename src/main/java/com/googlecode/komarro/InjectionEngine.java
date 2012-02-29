@@ -253,7 +253,9 @@ final class InjectionEngine {
 		private MockRepository(final List<MockDescriptor> mocks,
 				final MockEngine engine) {
 			for (final MockDescriptor descriptor : mocks) {
-				mockByName.put(descriptor.getName(), descriptor);
+				if (descriptor.getName() != null) {
+					mockByName.put(descriptor.getName(), descriptor);
+				}
 				mockByType.put(descriptor.getType(), descriptor);
 			}
 			this.mockEngine = engine;
