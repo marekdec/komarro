@@ -82,7 +82,7 @@ final class InjectionEngine {
 		int i = 0;
 		for (Class<?> paramType : params) {
 			final MockDescriptor descriptor = mockRepository.assignMock(
-					paramType, null);
+					paramType, null, AccessibleObjectType.CONSTRUCTOR);
 			createdMocks.add(descriptor);
 
 			mocksForCtorParameters[i++] = descriptor.getMock();
@@ -180,7 +180,8 @@ final class InjectionEngine {
 						try {
 							final MockDescriptor descriptor = mockRepository
 									.assignMock(field.getType(),
-											field.getName());
+											field.getName(),
+											AccessibleObjectType.FIELD);
 							createdMocks.add(descriptor);
 							field.set(systemUnderTest, descriptor.getMock());
 						} catch (final IllegalAccessException e) {
@@ -202,7 +203,8 @@ final class InjectionEngine {
 						final List<Object> params = new LinkedList<Object>();
 						for (final Class<?> type : method.getParameterTypes()) {
 							final MockDescriptor descriptor = mockRepository
-									.assignMock(type, method.getName());
+									.assignMock(type, method.getName(),
+											AccessibleObjectType.METHOD);
 							createdMocks.add(descriptor);
 							params.add(descriptor.getMock());
 						}
@@ -262,7 +264,7 @@ final class InjectionEngine {
 		}
 
 		public MockDescriptor assignMock(final Class<?> type,
-				final String elementName) {
+				final String elementName, final AccessibleObjectType elementType) {
 			if (mockByName.containsKey(elementName)) {
 				final MockDescriptor descriptor = mockByName.get(elementName);
 				if (type.equals(mockByName.get(elementName).getType())) {
@@ -279,8 +281,26 @@ final class InjectionEngine {
 				return mockByType.get(type);
 			}
 
-			return mockedObject(mockEngine.createMock(type)).withName(
-					elementName).ofType(type);
+			Object createdMock = tryCreatingMock(type, elementName, elementType);
+
+			return mockedObject(createdMock).withName(elementName).ofType(type);
+		}
+
+		private Object tryCreatingMock(final Class<?> type, String elementName,
+				AccessibleObjectType elementType) {
+			try {
+				return mockEngine.createMock(type);
+			} catch (Exception e) {
+				throw new IllegalArgumentException(
+						"The mock of type ["
+								+ type
+								+ "] that was tried to be injected into ["
+								+ (elementType == AccessibleObjectType.CONSTRUCTOR ? "Constructor"
+										: elementName)
+								+ "] cannot be created. It is probably caused by some limitations "
+								+ "of the underlying Mockito mock engine. Please see the exception "
+								+ "cause for details.", e);
+			}
 		}
 
 		private boolean isSetter(final String methodName) {
@@ -293,4 +313,7 @@ final class InjectionEngine {
 		}
 	}
 
+	private static enum AccessibleObjectType {
+		CONSTRUCTOR, FIELD, METHOD
+	}
 }
