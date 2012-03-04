@@ -181,7 +181,33 @@
 					<descriptor>src/main/assembly/all.xml</descriptor>
 				</configuration>
 			</plugin>
+			
+			<!-- Source jar and javadoc jar are generated on every build so that they get to snapshot repository when deployed
+				 TODO: consider attaching it to the deploy phase-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
+
 	</build>
 
 	<reporting>
