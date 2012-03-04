@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.mockito.Mock;
+import org.mockito.internal.util.MockUtil;
 
 /**
  * Komarro provides a way to define test's indirect input without a necessity to
@@ -280,6 +281,8 @@ public final class Komarro {
 
 	public static class Stubbing<T> {
 
+		private final MockUtil mockitoInternalUtils = new MockUtil();
+
 		private final Set<MockDescriptor> mocks;
 
 		private final TypeLiteral<?> returnTypeLiteral;
@@ -305,17 +308,29 @@ public final class Komarro {
 		public void thenReturn(final T recordedValue) {
 
 			for (final MockDescriptor descriptor : mocks) {
-
-				for (final Method method : methodsOf(
-						(Class<?>) descriptor.getType()).thatReturn(
-						returnTypeLiteral).asSet()) {
-					if (!method.getName().equals("hashCode")
-							&& !method.getName().equals("equals")) {
-						recorder.record(descriptor.getMock(), method,
-								recordedValue);
+				if (canBeStubbed(descriptor)) {
+					for (final Method method : methodsOf(
+							(Class<?>) descriptor.getType()).thatReturn(
+							returnTypeLiteral).asSet()) {
+						if (!method.getName().equals("hashCode")
+								&& !method.getName().equals("equals")) {
+							recorder.record(descriptor.getMock(), method,
+									recordedValue);
+						}
 					}
 				}
 			}
+		}
+
+		private boolean canBeStubbed(MockDescriptor descriptor) {
+			return isMockitoMock(descriptor.getMock());
+		}
+
+		private boolean isMockitoMock(Object mock) {
+			// Note that this routine is based on Mockito internals, if Mockito
+			// changes this utility method in the future, Komarro should change
+			// as well.
+			return mockitoInternalUtils.isMock(mock);
 		}
 	}
 }
