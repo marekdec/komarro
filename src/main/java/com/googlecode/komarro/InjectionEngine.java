@@ -295,7 +295,7 @@ final class InjectionEngine {
 			} else if (type == int.class) {
 				return 0;
 			} else if (type == short.class) {
-				return 0;
+				return (short) 0;
 			} else if (type == long.class) {
 				return 0L;
 			} else if (type == float.class) {

@@ -2,6 +2,7 @@ package com.googlecode.komarro.integration;
 
 import static com.googlecode.komarro.Komarro.instanceForTesting;
 import static com.googlecode.komarro.MockDescriptor.mockedObject;
+import static org.fest.assertions.Assertions.assertThat;
 
 import org.testng.annotations.Test;
 
@@ -39,7 +40,16 @@ public class InstantiateSutWithCtorWithPrimitiveTypesTest {
 
 	@Test
 	public void verifyCorrectDefaultValuesAreGivenToInjectedPrimitiveTypes() {
-		instanceForTesting(SUTWithAllPrimitveTypesToInject.class);
+		SUTWithAllPrimitveTypesToInject sut = instanceForTesting(SUTWithAllPrimitveTypesToInject.class);
 
+		assertThat(sut.getByteParam()).isEqualTo((byte) 0);
+		assertThat(sut.getShortParam()).isEqualTo((short) 0);
+		assertThat(sut.getIntParam()).isEqualTo(0);
+		assertThat(sut.getLongParam()).isEqualTo(0L);
+		assertThat(sut.getDoubleParam()).isEqualTo(0.0);
+		assertThat(sut.getFloatParam()).isEqualTo((float) 0.0);
+		assertThat(sut.isBooleanParam()).isEqualTo(false);
+		assertThat(sut.getCharParam()).isEqualTo((char) 0);
+		assertThat(sut.getStringParam()).isEqualTo("");
 	}
 }

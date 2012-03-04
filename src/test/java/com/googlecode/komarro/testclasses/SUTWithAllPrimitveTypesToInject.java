@@ -11,7 +11,7 @@ public class SUTWithAllPrimitveTypesToInject {
 	private byte byteParam;
 
 	@Inject
-	private byte shortParam;
+	private short shortParam;
 
 	@Inject
 	private int intParam;
@@ -39,7 +39,7 @@ public class SUTWithAllPrimitveTypesToInject {
 		return byteParam;
 	}
 
-	public byte getShortParam() {
+	public short getShortParam() {
 		return shortParam;
 	}
 
