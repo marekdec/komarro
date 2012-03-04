@@ -3,6 +3,7 @@ package com.googlecode.komarro;
 import static com.googlecode.komarro.Injector.withMockEngine;
 import static com.googlecode.komarro.MethodSieve.methodsOf;
 import static java.lang.Thread.currentThread;
+import static java.util.Arrays.asList;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+
+import org.mockito.Mock;
 
 /**
  * Komarro provides a way to define test's indirect input without a necessity to
@@ -90,7 +93,7 @@ public final class Komarro {
 			.synchronizedMap(new WeakHashMap<Thread, Set<MockDescriptor>>());
 
 	/**
-	 * Creates an instance of a unit under test, initialises {@link Komarro}.
+	 * Creates an instance of a unit under test, initializes {@link Komarro}.
 	 * This method has to be used to instantiate the unit under test. This finds
 	 * the injection point among the most popular injection points (e.g. JEE6
 	 * &#064;Inject, Seam 2 &#064;In or Spring &#064;Autowired annotations). It
@@ -111,9 +114,66 @@ public final class Komarro {
 	 * @param mocks
 	 *            descriptors of the user managed mocks that are to be injected
 	 */
-
 	public static <T> T instanceForTesting(
 			final Class<T> typeOfSystemUnderTest, final MockDescriptor... mocks) {
+		return createAndInjectMocks(typeOfSystemUnderTest, mocks);
+	}
+
+	/**
+	 * Creates an instance of a unit under test and initializes {@link Komarro}.
+	 * This method should to be used to instantiate the unit under test if the
+	 * user wishes to pass a set of automatically discovered mocks and mocks
+	 * specified manually.
+	 * <p>
+	 * It does have the same affect as
+	 * {@link #instanceForTesting(Class, MockDescriptor...)}, the only
+	 * difference is that it is possible to use following construct to
+	 * initialize the system under test:
+	 * <p>
+	 * <code>instanceForTesting(annotatedMocks(this), mockedObject("A string to inject").withName("stringParam").ofType(String.class)</code>
+	 * <p>
+	 * This way it is possible to pass both the mocks discovered using the
+	 * {@link MockitoMockDescriptionCreator#annotatedMocks(Object)} method and
+	 * mocks created with the builder for {@link MockDescriptor}s. These mocks
+	 * objects will be injected to the sut if a matching injection point is
+	 * found. However, if no matching mock object is found for an injection
+	 * point, a mock will be created and injected.
+	 * <p>
+	 * Note that this method should be used <b>only</b> if both mocks discovered
+	 * among fields annotated with the {@literal @}{@link Mock} annotation and
+	 * MockDescriptors created manually are to be injected into the system under
+	 * test.
+	 * 
+	 * @see {@link #instanceForTesting(Class, MockDescriptor...)} for details
+	 *      and other instructions.
+	 * 
+	 * @param systemUnderTest
+	 *            the unit that is going to be tested.
+	 * @param arrayOfMocks
+	 *            an array of mocks, the origianl intention is to be able to
+	 *            pass an array of mocks created by the
+	 *            {@link MockitoMockDescriptionCreator#annotatedMocks(Object)}
+	 *            method.
+	 * @param injectionPoint
+	 *            the injection point.
+	 * @param mocks
+	 *            descriptors of the user managed mocks that are to be injected
+	 */
+	public static <T> T instanceForTesting(
+			final Class<T> typeOfSystemUnderTest,
+			final MockDescriptor[] arrayOfMocks, final MockDescriptor... mocks) {
+		List<MockDescriptor> allGivenMocks = new ArrayList<MockDescriptor>(
+				asList(arrayOfMocks));
+		if (mocks != null) {
+			allGivenMocks.addAll(asList(mocks));
+		}
+
+		return createAndInjectMocks(typeOfSystemUnderTest,
+				allGivenMocks.toArray(new MockDescriptor[allGivenMocks.size()]));
+	}
+
+	private static <T> T createAndInjectMocks(
+			final Class<T> typeOfSystemUnderTest, MockDescriptor... mocks) {
 		final SutDescriptor<T> sutDescriptor = withMockEngine(new MockEngine())
 				.createInjector().instantiateAndInject(typeOfSystemUnderTest,
 						mocks);
