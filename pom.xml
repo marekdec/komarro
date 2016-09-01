@@ -65,7 +65,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
-			<version>1.9.0</version>
+			<version>1.10.19</version>
 		</dependency>
 
 		<!-- Testing dependencies -->
@@ -84,7 +84,7 @@
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-all</artifactId>
-			<version>1.9.0</version>
+			<version>1.10.19</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -181,9 +181,10 @@
 					<descriptor>src/main/assembly/all.xml</descriptor>
 				</configuration>
 			</plugin>
-			
-			<!-- Source jar and javadoc jar are generated on every build so that they get to snapshot repository when deployed
-				 TODO: consider attaching it to the deploy phase-->
+
+			<!-- Source jar and javadoc jar are generated on every build so that they 
+				get to snapshot repository when deployed TODO: consider attaching it to the 
+				deploy phase -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -206,9 +207,31 @@
 					</execution>
 				</executions>
 			</plugin>
+
 		</plugins>
 
 	</build>
+
+	<profiles>
+		<profile>
+			<id>doclint-java8-disable</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<reporting>
 		<plugins>
