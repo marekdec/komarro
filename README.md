@@ -1,7 +1,8 @@
 Current release: 1.0, available in maven central
 
+![logo](https://github.com/marekdec/komarro/blob/master/komarro_logo.png)
+
 # News
-After 8 months in limbo and 1 name change, Komarro got released!
 Release notes:
 
 1. The *given(type).isRequested* feature (with no support for generic collaborators guaranteed or collaborators that inherit from generic classes).
