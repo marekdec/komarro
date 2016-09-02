@@ -4,9 +4,9 @@ Current release: 1.0, available in maven central
 After 8 months in limbo and 1 name change, Komarro got released!
 Release notes:
 
-    The given(type).isRequested feature (with no support for generic collaborators guaranteed or collaborators that inherit from generic classes).
-    Unit under test initialization routine.
-    Mock collaborator generator and injection mechanism. 
+1. The *given(type).isRequested* feature (with no support for generic collaborators guaranteed or collaborators that inherit from generic classes).
+1. Unit under test initialization routine.
+1. Mock collaborator generator and injection mechanism. 
 
 Maven users can get it from:
 
